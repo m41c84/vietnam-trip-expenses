@@ -246,7 +246,7 @@ footer { color: var(--muted); font-size: 12px; margin: 24px 0; }
     <li><b>원화 환산</b>: 건별로 원 단위 반올림 후 합산. 세부 항목의 원화는 참고용이라 항목 합과 건 합계가 1~2원 다를 수 있음.</li>
     <li><b>특이사항</b>: 냐방 레스토랑(588,000₫)은 카드내역에 ‘VNPAY*MANGOS SPA’로 표기됨. 베트남 프루츠 앤 모어(55,000₫)는 앱에 한국시간 기준 9/22로 표기되나 현지 9/21 결제라 9/21 환율 적용.</li>
     <li><b>제외</b>: 트래블월렛 충전(+₫9,200,000)은 지출이 아니므로 제외. 그랩 290,160₫ 결제는 같은 날 전액 취소되어 0 처리.</li>
-    <li><b>검산</b>: 트래블월렛 카드 사용액 8,544,388₫ = 총 충전 9,200,000₫ − 최종 잔액 655,612₫.</li>
+    <li><b>검산</b>: 트래블월렛 카드 사용액 8,544,388₫ = 총 충전 9,200,000₫ − 최종 잔액 655,612₫ (9/21 Gel Remos IB 연고 75,000₫ 추가 전 기준).</li>
     <li><b>인천공항</b>: 출국 전 리브팜(31,200원, 우리카드)과 귀국 후 장기 주차(27,000원, 현금)는 원화 결제라 베트남 현지 합계에는 미포함, 정산 합계에는 포함.</li>
   </ul>
 
@@ -326,6 +326,7 @@ const ENTRIES = [
 
   { id: "e12", day: "0921", name: "TONY MART", ko: "토니마트 (편의점·마트)", pay: "travel", vnd: 167000, krw: 8823 },
   { id: "e13", day: "0921", name: "NCB*VIETNAM SELECT 2", ko: "베트남 셀렉트 2호점 (기념품·잡화점)", pay: "travel", vnd: 67000, krw: 3540 },
+  { id: "e28", day: "0921", name: "Gel Remos IB", ko: "레모스 IB 연고 (벌레 물림 연고)", pay: "travel", vnd: 75000, krw: 3962 },
   { id: "e14", day: "0921", time: "18:45", name: "Cafe Green Sunset", ko: "카페 그린 선셋", pay: "cash", vnd: 440000, krw: 23245, receipt: true,
     items: [["Green Set", "그린 세트 (아래 4종 구성)", 1, 440000, 23245], ["Bingsu xoài", "망고 빙수", 1, null, null, true], ["Bánh croffle xoài", "망고 크로플", 1, null, null, true], ["Sinh tố xoài", "망고 스무디", 1, null, null, true], ["Sinh tố dưa hấu", "수박 스무디", 1, null, null, true]],
     note: "망고빙수 세트 · 영수증 결제수단: Thanh toán tiền mặt(현금)" },
