@@ -137,7 +137,8 @@ h2 { font-size: 17px; margin: 28px 0 10px; letter-spacing: -0.01em; }
 .memo { margin-top: 8px; position: relative; }
 .memo-view { margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: var(--surface-2); font-size: 14px; white-space: pre-wrap; word-break: break-word; }
 .memo-view::before { content: "메모 · "; color: var(--muted); font-size: 12px; }
-.viewbar { margin-top: 14px; padding: 10px 14px; border-radius: 12px; background: var(--card-bg); color: var(--card); font-size: 13px; font-weight: 500; }
+.titlerow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.saved-at { flex: none; font-size: 12px; color: var(--muted); white-space: nowrap; }
 body.view .admin-only { display: none; }
 body:not(.view) .view-only { display: none; }
 .savebar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; padding: 8px 10px 8px 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); font-size: 13px; }
@@ -217,14 +218,13 @@ footer { color: var(--muted); font-size: 12px; margin: 24px 0; }
 <body>
 <div class="wrap">
   <header>
-    <h1>베트남 푸꾸옥 여행 결제 내역</h1>
+    <div class="titlerow"><h1>베트남 푸꾸옥 여행 결제 내역</h1><span class="saved-at num" id="savedAt"></span></div>
     <p class="sub">2026.09.18 (금) ~ 09.23 (수) · 금액 단위: 베트남 동(₫) / 원(KRW)</p>
     <div class="stats">
       <div class="stat main"><div class="lbl">베트남 현지 총 지출</div><div class="val num" id="sTotal"></div><div class="val2 num" id="sTotal2"></div></div>
       <div class="stat"><div class="lbl">카드 결제</div><div class="val num" id="sCard"></div><div class="val2 num" id="sCard2"></div></div>
       <div class="stat"><div class="lbl">현금 결제</div><div class="val num" id="sCash"></div><div class="val2 num" id="sCash2"></div></div>
     </div>
-    <div class="viewbar view-only" id="viewbar">보기 전용 · 관리자가 저장한 정산 결과예요. 분류와 메모는 확인만 할 수 있어요.<span id="viewSaved"></span></div>
   </header>
 
   <h2>정산 (인천공항 포함)</h2>
@@ -473,10 +473,8 @@ const fmtTime = (iso) => {
 };
 
 function renderSaveStatus() {
-  if (VIEW) {
-    $("#viewSaved").textContent = savedAt ? ` (마지막 저장 ${fmtTime(savedAt)})` : "";
-    return;
-  }
+  $("#savedAt").textContent = savedAt ? `마지막 저장 ${fmtTime(savedAt)}` : "";
+  if (VIEW) return;
   const bar = $("#savebar");
   const dirty = isDirty();
   bar.classList.toggle("dirty", dirty);
