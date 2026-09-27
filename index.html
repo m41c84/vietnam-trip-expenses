@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>푸꾸옥 여행 정산</title>
+<meta name="description" content="베트남 푸꾸옥 여행(2026.09.18~09.23) 결제 내역 정리 및 정산">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --text: #1b1f27;
+  --muted: #6b7280;
+  --line: #e3e6eb;
+  --ink: #1e2430;
+  --ink-text: #ffffff;
+  --card: #2563eb;  --card-bg: #e7efff;
+  --hy: #7c3aed;    --hy-bg: #f0e9ff;
+  --cash: #d9480f;  --cash-bg: #fff0e6;
+  --cancel: #dc2626; --cancel-bg: #fde8e8;
+  --p-h: #db2777; --p-h-bg: #fde7f2;
+  --p-s: #0891b2; --p-s-bg: #e0f6fb;
+  --p-j: #16a34a; --p-j-bg: #e3f6e9;
+  --p-c: #475569; --p-c-bg: #e8ecf1;
+  --shadow: 0 1px 2px rgba(16,24,40,.05);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --surface: #181b21; --surface-2: #20242c; --text: #e8eaee; --muted: #9aa1ad; --line: #2b3039;
+    --ink: #2a3140; --ink-text: #ffffff;
+    --card: #7aa7ff; --card-bg: #1c2a47; --hy: #b69cff; --hy-bg: #2a2144;
+    --cash: #ff9a5c; --cash-bg: #3a2415; --cancel: #ff7b7b; --cancel-bg: #3a1a1a;
+    --p-h: #ff7eb9; --p-h-bg: #3d1a2c; --p-s: #5fd3ea; --p-s-bg: #133239;
+    --p-j: #5ad785; --p-j-bg: #15311f; --p-c: #aab6c6; --p-c-bg: #262d37;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115; --surface: #181b21; --surface-2: #20242c; --text: #e8eaee; --muted: #9aa1ad; --line: #2b3039;
+  --ink: #2a3140; --ink-text: #ffffff;
+  --card: #7aa7ff; --card-bg: #1c2a47; --hy: #b69cff; --hy-bg: #2a2144;
+  --cash: #ff9a5c; --cash-bg: #3a2415; --cancel: #ff7b7b; --cancel-bg: #3a1a1a;
+  --p-h: #ff7eb9; --p-h-bg: #3d1a2c; --p-s: #5fd3ea; --p-s-bg: #133239;
+  --p-j: #5ad785; --p-j-bg: #15311f; --p-c: #aab6c6; --p-c-bg: #262d37;
+  --shadow: none;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+  font-size: 15px; line-height: 1.5;
+  padding-bottom: calc(76px + env(safe-area-inset-bottom));
+}
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+.num { font-variant-numeric: tabular-nums; }
+header { padding: 28px 0 8px; }
+h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -0.02em; }
+.sub { color: var(--muted); font-size: 13px; margin: 0; }
+h2 { font-size: 17px; margin: 28px 0 10px; letter-spacing: -0.01em; }
+
+.stats { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 10px; margin-top: 16px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); }
+.stat.main { background: var(--ink); color: var(--ink-text); border-color: transparent; }
+.stat .lbl { font-size: 12px; opacity: .75; }
+.stat .val { font-size: 22px; font-weight: 700; margin-top: 2px; letter-spacing: -0.02em; }
+.stat .val2 { font-size: 12px; opacity: .7; }
+
+.people { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.person {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px;
+  text-align: left; cursor: pointer; font: inherit; color: inherit; box-shadow: var(--shadow);
+  border-top: 4px solid var(--pc);
+}
+.person[aria-pressed="true"] { outline: 2px solid var(--pc); outline-offset: -1px; }
+.person .nm { font-size: 13px; font-weight: 700; color: var(--pc); }
+.person .amt { font-size: 19px; font-weight: 700; margin-top: 2px; letter-spacing: -0.02em; }
+.person .cnt { font-size: 12px; color: var(--muted); }
+.person .share { font-size: 12px; color: var(--muted); margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--line); }
+.person .share b { color: var(--text); }
+.unassigned { margin-top: 8px; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+.unassigned button { font: inherit; background: none; border: none; color: var(--card); padding: 0; cursor: pointer; text-decoration: underline; }
+
+.filters { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 10px 0; margin-top: 8px; border-bottom: 1px solid var(--line); }
+.chiprow { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px 0; }
+.chiprow::-webkit-scrollbar { display: none; }
+.chiprow + .chiprow { margin-top: 6px; }
+.chip {
+  flex: none; font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--text);
+}
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--ink-text); border-color: var(--ink); }
+.chip .c { opacity: .6; margin-left: 3px; }
+
+.day { margin-top: 22px; }
+.dayhead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; padding-bottom: 8px; border-bottom: 2px solid var(--text); margin-bottom: 10px; }
+.dayhead .d { font-weight: 700; font-size: 17px; }
+.dayhead .rate { color: var(--muted); font-size: 12px; margin-left: 6px; font-weight: 400; }
+.dayhead .tot { font-size: 14px; }
+.dayhead .tot b { font-size: 15px; }
+
+.entry { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow); border-left: 4px solid var(--line); }
+.entry[data-who="h"] { border-left-color: var(--p-h); }
+.entry[data-who="s"] { border-left-color: var(--p-s); }
+.entry[data-who="j"] { border-left-color: var(--p-j); }
+.entry[data-who="c"] { border-left-color: var(--p-c); }
+.entry.canceled { opacity: .65; }
+.top { display: flex; gap: 12px; justify-content: space-between; align-items: flex-start; }
+.top .l { min-width: 0; }
+.time { font-size: 12px; color: var(--muted); font-weight: 500; }
+.name { font-weight: 700; font-size: 15px; word-break: break-word; }
+.ko { color: var(--muted); font-size: 13px; }
+.top .r { text-align: right; flex: none; }
+.krw { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; white-space: nowrap; }
+.vnd { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.badges { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+.badge { font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.b-card { color: var(--card); background: var(--card-bg); }
+.b-hy { color: var(--hy); background: var(--hy-bg); }
+.b-cash { color: var(--cash); background: var(--cash-bg); }
+.b-cancel { color: var(--cancel); background: var(--cancel-bg); }
+.b-soft { color: var(--muted); background: var(--surface-2); font-weight: 500; }
+
+.assign { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 12px; }
+.assign button {
+  font: inherit; font-size: 13px; font-weight: 500; padding: 8px 0; border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); min-height: 38px;
+}
+.assign button[aria-checked="true"] { background: var(--pc-bg); color: var(--pc); border-color: var(--pc); font-weight: 700; }
+.assign button:disabled { cursor: not-allowed; opacity: .5; }
+
+.memo { margin-top: 8px; position: relative; }
+.memo input {
+  width: 100%; font: inherit; font-size: 16px; /* 16px: iOS 확대 방지 */
+  padding: 8px 56px 8px 10px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--text);
+}
+.memo input::placeholder { color: var(--muted); opacity: .8; }
+.memo input:focus { outline: 2px solid var(--card); outline-offset: -1px; }
+.memo .cnt { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--muted); pointer-events: none; }
+
+details.items { margin-top: 10px; }
+details.items summary { cursor: pointer; font-size: 13px; color: var(--muted); list-style: none; display: inline-flex; align-items: center; gap: 4px; }
+details.items summary::-webkit-details-marker { display: none; }
+details.items summary::before { content: "▸"; font-size: 11px; transition: transform .15s; }
+details.items[open] summary::before { transform: rotate(90deg); }
+table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 4px 4px 6px; border-bottom: 1px solid var(--line); }
+td { padding: 7px 4px; border-bottom: 1px dashed var(--line); vertical-align: top; }
+th.n, td.n { text-align: right; white-space: nowrap; }
+td .k { color: var(--muted); font-size: 12px; }
+tr.sub td:first-child { padding-left: 16px; }
+.inote { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+.empty { text-align: center; color: var(--muted); padding: 40px 0; }
+
+.rules { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 6px 18px; font-size: 13px; color: var(--muted); }
+.rules li { margin: 8px 0; }
+.rules b { color: var(--text); }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.btn { font: inherit; font-size: 13px; padding: 8px 14px; border-radius: 10px; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--text); }
+.btn.primary { background: var(--ink); color: var(--ink-text); border-color: var(--ink); }
+footer { color: var(--muted); font-size: 12px; margin: 24px 0; }
+
+.bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  background: var(--ink); color: var(--ink-text);
+  padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+}
+.bar .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.bar .lbl { font-size: 12px; opacity: .75; }
+.bar .big { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+.bar .r { text-align: right; font-size: 12px; opacity: .8; }
+
+.toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 20; max-width: calc(100% - 32px); }
+.toast.show { opacity: 1; }
+
+.p-h { --pc: var(--p-h); --pc-bg: var(--p-h-bg); }
+.p-s { --pc: var(--p-s); --pc-bg: var(--p-s-bg); }
+.p-j { --pc: var(--p-j); --pc-bg: var(--p-j-bg); }
+.p-c { --pc: var(--p-c); --pc-bg: var(--p-c-bg); }
+
+@media (max-width: 640px) {
+  h1 { font-size: 21px; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .stat.main { grid-column: 1 / -1; }
+  .people { grid-template-columns: 1fr 1fr; }
+  .krw { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>베트남 푸꾸옥 여행 결제 내역</h1>
+    <p class="sub">2026.09.18 (금) ~ 09.23 (수) · 금액 단위: 베트남 동(₫) / 원(KRW)</p>
+    <div class="stats">
+      <div class="stat main"><div class="lbl">베트남 현지 총 지출</div><div class="val num" id="sTotal"></div><div class="val2 num" id="sTotal2"></div></div>
+      <div class="stat"><div class="lbl">카드 결제</div><div class="val num" id="sCard"></div><div class="val2 num" id="sCard2"></div></div>
+      <div class="stat"><div class="lbl">현금 결제</div><div class="val num" id="sCash"></div><div class="val2 num" id="sCash2"></div></div>
+    </div>
+  </header>
+
+  <h2>정산 (인천공항 포함)</h2>
+  <div class="people" id="people"></div>
+  <div class="unassigned" id="unassigned"></div>
+
+  <div class="filters">
+    <div class="chiprow" id="fWho" role="group" aria-label="분류 필터"></div>
+    <div class="chiprow" id="fPay" role="group" aria-label="결제수단 필터"></div>
+  </div>
+
+  <main id="list"></main>
+
+  <h2>정리 기준</h2>
+  <ul class="rules">
+    <li><b>환율</b>: 결제일(현지 날짜)의 VND→KRW 시장 기준환율. 9/18 0.05326 · 9/21 0.05283 · 9/22 0.05210 · 9/23 0.05249 (원/₫). 9/19·9/20은 주말로 직전 영업일(9/18) 환율 적용. 실제 카드사 청구 원화액과는 수수료·매입일 차이로 소폭 다를 수 있음.</li>
+    <li><b>원화 환산</b>: 건별로 원 단위 반올림 후 합산. 세부 항목의 원화는 참고용이라 항목 합과 건 합계가 1~2원 다를 수 있음.</li>
+    <li><b>특이사항</b>: 냐방 레스토랑(588,000₫)은 카드내역에 ‘VNPAY*MANGOS SPA’로 표기됨. 베트남 프루츠 앤 모어(55,000₫)는 앱에 한국시간 기준 9/22로 표기되나 현지 9/21 결제라 9/21 환율 적용.</li>
+    <li><b>제외</b>: 트래블월렛 충전(+₫9,200,000)은 지출이 아니므로 제외. 그랩 290,160₫ 결제는 같은 날 전액 취소되어 0 처리.</li>
+    <li><b>검산</b>: 트래블월렛 카드 사용액 8,544,388₫ = 총 충전 9,200,000₫ − 최종 잔액 655,612₫.</li>
+    <li><b>인천공항</b>: 출국 전 원화 결제(31,200원)는 베트남 현지 합계에는 미포함, 정산 합계에는 포함.</li>
+  </ul>
+
+  <h2>정산 데이터</h2>
+  <p class="sub">선택한 분류와 메모는 이 기기의 브라우저에 저장됩니다. 다른 사람과 맞추려면 공유 링크를 보내 주세요.</p>
+  <div class="tools">
+    <button class="btn primary" id="shareBtn" type="button">공유 링크 복사</button>
+    <button class="btn" id="resetBtn" type="button">선택·메모 초기화</button>
+  </div>
+
+  <footer>작성일 2026.09.27 · 트래블월렛 이용내역, 현지 영수증, 인천공항 영수증 기준</footer>
+</div>
+
+<div class="bar" aria-live="polite">
+  <div class="wrap">
+    <div><div class="lbl" id="barLbl">전체</div><div class="big num" id="barKrw"></div></div>
+    <div class="r num" id="barSub"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const PEOPLE = [
+  { id: "h", name: "희선" },
+  { id: "s", name: "송이" },
+  { id: "j", name: "자경" },
+  { id: "c", name: "공용 비용" },
+];
+const PAY = {
+  travel: { label: "카드 (트래블월렛)", cls: "b-card", kind: "card" },
+  hyundai: { label: "카드 (현대카드)", cls: "b-hy", kind: "card" },
+  woori: { label: "카드 (우리카드)", cls: "b-hy", kind: "card" },
+  cash: { label: "현금", cls: "b-cash", kind: "cash" },
+};
+const DAYS = [
+  { key: "air", label: "출국 전 · 인천공항", rate: "원화 결제 · 베트남 합계 미포함" },
+  { key: "0918", label: "2026.09.18 (금)", rate: "100₫ = 5.326원" },
+  { key: "0919", label: "2026.09.19 (토)", rate: "100₫ = 5.326원 (주말 · 9/18 적용)" },
+  { key: "0920", label: "2026.09.20 (일)", rate: "100₫ = 5.326원 (주말 · 9/18 적용)" },
+  { key: "0921", label: "2026.09.21 (월)", rate: "100₫ = 5.283원" },
+  { key: "0922", label: "2026.09.22 (화)", rate: "100₫ = 5.210원" },
+  { key: "0923", label: "2026.09.23 (수)", rate: "100₫ = 5.249원" },
+];
+// items: [현지어, 한국어, 수량, VND, KRW, 세트구성여부]
+const ENTRIES = [
+  { id: "air1", day: "air", time: "15:39", name: "리브팜", ko: "인천공항 제1여객터미널 면세구역", pay: "woori", vnd: null, krw: 31200, receipt: true,
+    items: [["바질페스토 햄치즈 파니니", "", 1, null, 11800], ["에그치킨 샌드위치", "", 1, null, 9800], ["바질마요 치킨 샌드위치", "", 1, null, 9600]] },
+
+  { id: "e01", day: "0918", name: "Grab* 980c839fc57a217a", ko: "그랩 트래블패스 (할인 구독권)", pay: "travel", vnd: 25000, krw: 1332 },
+  { id: "e02", day: "0918", name: "Grab* A-9ROCMKVWWHEEAV", ko: "그랩 차량 이동", pay: "travel", vnd: 97760, krw: 5207 },
+  { id: "e03", day: "0918", name: "Grab* A-9ROCMKVWWHEEAV", ko: "그랩 차량 이동 (동일 건 추가 청구)", pay: "travel", vnd: 4160, krw: 222 },
+
+  { id: "e04", day: "0919", name: "Grab* A-9RQLOPRGW7OSAV", ko: "그랩 차량 이동", pay: "travel", vnd: 31200, krw: 1662 },
+  { id: "e05", day: "0919", name: "Grab* A-9RQQ3XCW2MV4AV", ko: "그랩 차량 이동 — 결제 후 전액 취소 (−290,160 / +290,160)", pay: "travel", vnd: 0, krw: 0, canceled: true },
+  { id: "e06", day: "0919", name: "KINGKONG PQ", ko: "킹콩마트 푸꾸옥 (대형마트)", pay: "travel", vnd: 1304000, krw: 69451 },
+  { id: "e07", day: "0919", name: "VNPAY XOM MOI GARDEN", ko: "쏨머이 가든 (베트남 식당)", pay: "travel", vnd: 680058, krw: 36220 },
+  { id: "e08", day: "0919", name: "Grab* A-9RRAR8TGWLPBAV", ko: "그랩 차량 이동", pay: "travel", vnd: 286000, krw: 15232 },
+
+  { id: "e09", day: "0920", time: "19:05", name: "Cơm thố tay cầm Seafood & Meat BBQ", ko: "껌토 따이깜 해산물·고기 BBQ (손잡이 뚝배기밥 식당)", pay: "travel", vnd: 655000, krw: 34885, receipt: true,
+    items: [["Tôm thẻ kho tiêu", "흰다리새우 후추 뚝배기조림", 1, 185000, 9853], ["Mực tẩm bột chiên giòn", "오징어 튀김 (칼라마리)", 1, 185000, 9853], ["Rau muống xào tỏi", "모닝글로리 마늘볶음", 1, 70000, 3728], ["Cơm ghẹ Hàm Ninh", "함닌 꽃게살 볶음밥", 1, 165000, 8788], ["Saigon Special", "사이공 스페셜 맥주", 1, 30000, 1598], ["Mirinda xá xị", "미린다 사르사(루트비어맛) 탄산음료", 1, 20000, 1065]],
+    note: "카드내역 표기: COM THO TAY CAM · 리조트 앞 저녁식사" },
+  { id: "e10", day: "0920", time: "21:15", name: "SEN SPA", ko: "센 스파 (연꽃 스파)", pay: "cash", vnd: 1200000, krw: 63912, receipt: true,
+    items: [["Deep Tissue 60 (Lần)", "딥티슈 마사지 60분 (1회)", 1, 600000, 31956], ["Aloe Vera ice brewing (Lần)", "알로에베라 쿨링 진정 케어 (1회)", 1, 300000, 15978], ["Foot 30 (Lần)", "발 마사지 30분 (1회)", 1, 300000, 15978]] },
+  { id: "e11", day: "0920", time: "21:24", name: "Siêu thị Grand Mart 1", ko: "그랜드마트 1호점 (슈퍼마켓)", pay: "cash", vnd: 50000, krw: 2663, receipt: true,
+    items: [["Nước lê Sydney 1000ml (chai)", "시드니 배 주스 1L (병)", 1, 50000, 2663]], note: "영수증 결제수단: Tiền mặt(현금)" },
+
+  { id: "e12", day: "0921", name: "TONY MART", ko: "토니마트 (편의점·마트)", pay: "travel", vnd: 167000, krw: 8823 },
+  { id: "e13", day: "0921", name: "NCB*VIETNAM SELECT 2", ko: "베트남 셀렉트 2호점 (기념품·잡화점)", pay: "travel", vnd: 67000, krw: 3540 },
+  { id: "e14", day: "0921", time: "18:45", name: "Cafe Green Sunset", ko: "카페 그린 선셋", pay: "cash", vnd: 440000, krw: 23245, receipt: true,
+    items: [["Green Set", "그린 세트 (아래 4종 구성)", 1, 440000, 23245], ["Bingsu xoài", "망고 빙수", 1, null, null, true], ["Bánh croffle xoài", "망고 크로플", 1, null, null, true], ["Sinh tố xoài", "망고 스무디", 1, null, null, true], ["Sinh tố dưa hấu", "수박 스무디", 1, null, null, true]],
+    note: "망고빙수 세트 · 영수증 결제수단: Thanh toán tiền mặt(현금)" },
+  { id: "e15", day: "0921", time: "21:55", name: "Crazy Good Phu Quoc Squid", ko: "크레이지 굿 푸꾸옥 오징어 (야시장)", pay: "travel", vnd: 240000, krw: 12679, receipt: true,
+    items: [["Khoai tây bò bằm phô mai", "다진 소고기 치즈 감자튀김", 1, 90000, 4755], ["Mực lá nướng muối ớt", "무늬오징어 소금·고추 구이", 1, 150000, 7924]],
+    note: "카드내역 표기: CN CTY TNHH MT PQ TAI HT · 야시장 오징어, 감튀 · 부가세 8% 포함" },
+  { id: "e16", day: "0921", time: "22:20", name: "Vietnam Fruits & More", ko: "베트남 프루츠 앤 모어 (선셋타운 야시장 입구 상점)", pay: "travel", vnd: 55000, krw: 2906, receipt: true,
+    items: [["Xịt xua muỗi hương Lavender (Mentholatum Remos) 70ml", "멘소래담 레모스 모기기피 스프레이 라벤더향 70ml", 1, 55000, 2906]],
+    note: "카드내역 표기: NCB*VIETNAM SELECT 6 (앱 표기일 9/22) · 모기퇴치약" },
+
+  { id: "e17", day: "0922", name: "Grab* A-9S4VXSCWW2CSAV", ko: "그랩 차량 이동", pay: "travel", vnd: 63440, krw: 3305 },
+  { id: "e18", day: "0922", name: "NCB*THE LOUNGE", ko: "더 라운지 (카페·라운지)", pay: "travel", vnd: 119070, krw: 6204 },
+
+  { id: "e19", day: "0923", time: "12:14", name: "NCB*NWPQR_FO 02 (Khem Beach)", ko: "뉴월드 푸꾸옥 리조트 (켐 비치)", pay: "hyundai", vnd: 1213380, krw: 63690, receipt: true,
+    items: [["Room service", "룸서비스 (영수증에 세부 메뉴 없음)", 1, 1213380, 63690]], note: "룸서비스 · 트래블월렛이 아닌 현대카드로 결제" },
+  { id: "e20", day: "0923", name: "Grab* A-9SBE7OIGWUOVAV", ko: "그랩 차량 이동", pay: "travel", vnd: 283920, krw: 14903 },
+  { id: "e21", day: "0923", time: "16:15", name: "Nhà Vàng Restaurant", ko: "냐방 레스토랑 (‘황금집’ 식당)", pay: "travel", vnd: 588000, krw: 30864, receipt: true,
+    items: [["Thịt kho trứng", "돼지고기 계란 장조림", 1, 130000, 6824], ["Bánh xèo", "반쎄오 (베트남식 부침개)", 1, 130000, 6824], ["Cơm chiên hải sản", "해산물 볶음밥", 1, 130000, 6824], ["Mực chiên giòn", "오징어 튀김", 1, 170000, 8923], ["Phí cà thẻ", "카드 결제 수수료", 1, 28000, 1470]],
+    note: "카드내역 표기: VNPAY*MANGOS SPA · 카드 수수료 5% 포함" },
+  { id: "e22", day: "0923", time: "18:43", name: "HKD Little Win", ko: "리틀 윈 (개인사업자 마사지숍)", pay: "travel", vnd: 900000, krw: 47241, receipt: true,
+    items: [["Massage chân", "발 마사지", 1, 900000, 47241]], note: "카드내역 표기: HKD LITTLE WIN · 세부 항목 없는 카드 전표" },
+  { id: "e23", day: "0923", time: "18:57", name: "Kingkong Coffee Food Court", ko: "킹콩커피 푸드코트 (즈엉동)", pay: "travel", vnd: 173600, krw: 9112, receipt: true,
+    items: [["Sinh tố xoài (Mango smoothie)", "망고 스무디", 2, 158000, 8293], ["Bạc xỉu đá (White coffee – Ice)", "박씨우 아이스 (연유 화이트커피)", 1, 59000, 3097], ["Phiếu giảm giá hội viên", "회원 할인 쿠폰 (20%)", 1, -43400, -2278]],
+    note: "카드내역 표기: KINGKONG COFFEE" },
+  { id: "e24", day: "0923", name: "KINGKONG PQ", ko: "킹콩마트 푸꾸옥 (대형마트)", pay: "travel", vnd: 946500, krw: 49682 },
+  { id: "e25", day: "0923", name: "KINGKONG PQ", ko: "킹콩마트 푸꾸옥 (대형마트)", pay: "travel", vnd: 1736000, krw: 91123 },
+  { id: "e26", day: "0923", name: "Grab* A-9SCO5VXGWXBIAV", ko: "그랩 차량 이동", pay: "travel", vnd: 113360, krw: 5950 },
+  { id: "e27", day: "0923", name: "Grab* A-9SCO5VXGWXBIAV", ko: "그랩 차량 이동 (동일 건 추가 청구)", pay: "travel", vnd: 8320, krw: 437 },
+];
+
+const STORE_KEY = "pq-trip-2026-v1";
+const MEMO_MAX = 100;
+let state = { a: {}, m: {} };
+let filter = { who: "all", pay: "all" };
+
+const $ = (s) => document.querySelector(s);
+const fmt = (n) => n.toLocaleString("ko-KR");
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const payKind = (e) => PAY[e.pay].kind;
+const counted = (e) => !e.canceled;
+const isVietnam = (e) => e.day !== "air";
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) state = sanitize(JSON.parse(raw));
+  } catch (_) {}
+}
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (_) {}
+}
+function sanitize(obj) {
+  const ids = new Set(ENTRIES.map((e) => e.id));
+  const who = new Set(PEOPLE.map((p) => p.id));
+  const out = { a: {}, m: {} };
+  if (obj && typeof obj === "object") {
+    for (const [k, v] of Object.entries(obj.a || {})) if (ids.has(k) && who.has(v)) out.a[k] = v;
+    for (const [k, v] of Object.entries(obj.m || {})) if (ids.has(k) && typeof v === "string" && v) out.m[k] = [...v].slice(0, MEMO_MAX).join("");
+  }
+  return out;
+}
+
+// 공유 링크: 상태를 URL 해시에 base64url로 담는다
+function encodeState() {
+  const bytes = new TextEncoder().encode(JSON.stringify(state));
+  let bin = "";
+  bytes.forEach((b) => (bin += String.fromCharCode(b)));
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function decodeState(str) {
+  const b64 = str.replace(/-/g, "+").replace(/_/g, "/");
+  const bin = atob(b64);
+  const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+  return sanitize(JSON.parse(new TextDecoder().decode(bytes)));
+}
+function importFromHash() {
+  const m = location.hash.match(/^#s=(.+)$/);
+  if (!m) return;
+  try {
+    const incoming = decodeState(m[1]);
+    const hasLocal = Object.keys(state.a).length || Object.keys(state.m).length;
+    if (!hasLocal || confirm("공유 링크의 정산 내용으로 이 기기의 선택·메모를 덮어쓸까요?")) {
+      state = incoming;
+      save();
+      toast("공유된 정산 내용을 불러왔어요");
+    }
+  } catch (_) {
+    toast("공유 링크를 읽지 못했어요");
+  }
+  history.replaceState(null, "", location.pathname + location.search);
+}
+
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+function renderStats() {
+  const vn = ENTRIES.filter((e) => isVietnam(e) && counted(e));
+  const sum = (arr, k) => arr.reduce((s, e) => s + e[k], 0);
+  const card = vn.filter((e) => payKind(e) === "card");
+  const cash = vn.filter((e) => payKind(e) === "cash");
+  $("#sTotal").textContent = fmt(sum(vn, "krw")) + "원";
+  $("#sTotal2").textContent = `${fmt(sum(vn, "vnd"))} ₫ · ${vn.length}건`;
+  $("#sCard").textContent = fmt(sum(card, "krw")) + "원";
+  $("#sCard2").textContent = `${fmt(sum(card, "vnd"))} ₫ · ${card.length}건`;
+  $("#sCash").textContent = fmt(sum(cash, "krw")) + "원";
+  $("#sCash2").textContent = `${fmt(sum(cash, "vnd"))} ₫ · ${cash.length}건`;
+}
+
+function totalsFor(who) {
+  const list = ENTRIES.filter((e) => counted(e) && (state.a[e.id] || null) === who);
+  return { krw: list.reduce((s, e) => s + e.krw, 0), n: list.length };
+}
+
+function renderPeople() {
+  const common = totalsFor("c");
+  const commonShare = Math.round(common.krw / 3);
+  $("#people").innerHTML = PEOPLE.map((p) => {
+    const t = totalsFor(p.id);
+    const share = p.id === "c"
+      ? `<div class="share">1인당 (÷3) <b class="num">${fmt(commonShare)}원</b></div>`
+      : `<div class="share">개인 + 공용÷3 <b class="num">${fmt(t.krw + commonShare)}원</b></div>`;
+    return `<button type="button" class="person p-${p.id}" data-who="${p.id}" aria-pressed="${filter.who === p.id}">
+      <div class="nm">${p.name}</div>
+      <div class="amt num">${fmt(t.krw)}원</div>
+      <div class="cnt">${t.n}건</div>
+      ${share}
+    </button>`;
+  }).join("");
+  const un = totalsFor(null);
+  $("#unassigned").innerHTML = un.n
+    ? `<span>아직 분류하지 않은 내역 <b class="num">${un.n}건 · ${fmt(un.krw)}원</b></span><button type="button" data-who="none">미지정만 보기</button>`
+    : `<span>모든 내역이 분류되었어요 ✓</span>`;
+}
+
+function renderFilters() {
+  const cntWho = (w) => ENTRIES.filter((e) => counted(e) && (w === "all" || (state.a[e.id] || "none") === w)).length;
+  const whoOpts = [["all", "전체"], ...PEOPLE.map((p) => [p.id, p.name]), ["none", "미지정"]];
+  $("#fWho").innerHTML = whoOpts.map(([k, l]) =>
+    `<button type="button" class="chip" data-who="${k}" aria-pressed="${filter.who === k}">${l}<span class="c">${cntWho(k)}</span></button>`
+  ).join("");
+  const payOpts = [["all", "모든 결제수단"], ["card", "카드"], ["cash", "현금"]];
+  $("#fPay").innerHTML = payOpts.map(([k, l]) =>
+    `<button type="button" class="chip" data-pay="${k}" aria-pressed="${filter.pay === k}">${l}</button>`
+  ).join("");
+}
+
+function matches(e) {
+  if (filter.pay !== "all" && payKind(e) !== filter.pay) return false;
+  if (filter.who !== "all") {
+    if (e.canceled) return false;
+    if ((state.a[e.id] || "none") !== filter.who) return false;
+  }
+  return true;
+}
+
+function entryHTML(e) {
+  const p = PAY[e.pay];
+  const who = state.a[e.id] || "";
+  const memo = state.m[e.id] || "";
+  const badges = [`<span class="badge ${p.cls}">${p.label}</span>`];
+  if (e.canceled) badges.push(`<span class="badge b-cancel">결제 취소</span>`);
+  else badges.push(`<span class="badge b-soft">${e.receipt ? "영수증 있음" : "카드내역 (영수증 없음)"}</span>`);
+  const amount = e.vnd == null
+    ? `<div class="vnd">KRW</div><div class="krw num">${fmt(e.krw)}원</div>`
+    : `<div class="krw num">${fmt(e.krw)}원</div><div class="vnd num">${fmt(e.vnd)} ₫</div>`;
+  const assign = PEOPLE.map((pp) =>
+    `<button type="button" role="radio" class="p-${pp.id}" data-id="${e.id}" data-set="${pp.id}" aria-checked="${who === pp.id}"${e.canceled ? " disabled" : ""}>${pp.name === "공용 비용" ? "공용" : pp.name}</button>`
+  ).join("");
+  let items = "";
+  if (e.items) {
+    const krwOnly = e.vnd == null;
+    const rows = e.items.map(([vi, ko, q, v, k, sub]) => `<tr${sub ? ' class="sub"' : ""}>
+      <td>${sub ? "└ " : ""}${esc(vi)}${ko ? `<div class="k">${esc(ko)}</div>` : ""}</td>
+      <td class="n">${q}</td>
+      ${krwOnly ? "" : `<td class="n num">${v == null ? "포함" : fmt(v)}</td>`}
+      <td class="n num">${k == null ? "" : fmt(k)}</td></tr>`).join("");
+    items = `<details class="items"><summary>세부 항목 ${e.items.length}개</summary>
+      <table><thead><tr><th>${krwOnly ? "항목" : "항목 (현지어 / 한국어)"}</th><th class="n">수량</th>${krwOnly ? "" : '<th class="n">VND</th>'}<th class="n">${krwOnly ? "금액" : "KRW"}</th></tr></thead><tbody>${rows}</tbody></table>
+      ${e.note ? `<div class="inote">${esc(e.note)}</div>` : ""}</details>`;
+  }
+  return `<article class="entry${e.canceled ? " canceled" : ""}" data-who="${who}">
+    <div class="top">
+      <div class="l">
+        ${e.time ? `<div class="time">${e.time}</div>` : ""}
+        <div class="name">${esc(e.name)}</div>
+        <div class="ko">${esc(e.ko)}</div>
+      </div>
+      <div class="r">${amount}</div>
+    </div>
+    <div class="badges">${badges.join("")}</div>
+    <div class="assign" role="radiogroup" aria-label="${esc(e.ko)} 분류">${assign}</div>
+    <div class="memo">
+      <input type="text" data-memo="${e.id}" maxlength="${MEMO_MAX}" placeholder="메모 (최대 ${MEMO_MAX}자)" value="${esc(memo)}" aria-label="메모">
+      <span class="cnt num">${[...memo].length}/${MEMO_MAX}</span>
+    </div>
+    ${items}
+  </article>`;
+}
+
+function renderList() {
+  const html = [];
+  for (const d of DAYS) {
+    const list = ENTRIES.filter((e) => e.day === d.key && matches(e));
+    if (!list.length) continue;
+    const krw = list.filter(counted).reduce((s, e) => s + e.krw, 0);
+    const vnd = list.filter(counted).reduce((s, e) => s + (e.vnd || 0), 0);
+    const tot = d.key === "air" ? `<b class="num">${fmt(krw)}원</b>` : `<span class="num">${fmt(vnd)} ₫</span> · <b class="num">${fmt(krw)}원</b>`;
+    html.push(`<section class="day"><div class="dayhead"><div class="d">${d.label}<span class="rate">${d.rate}</span></div><div class="tot">${tot}</div></div>${list.map(entryHTML).join("")}</section>`);
+  }
+  $("#list").innerHTML = html.length ? html.join("") : `<div class="empty">조건에 맞는 결제 내역이 없어요</div>`;
+}
+
+function renderBar() {
+  const list = ENTRIES.filter((e) => counted(e) && matches(e));
+  const krw = list.reduce((s, e) => s + e.krw, 0);
+  const vnd = list.reduce((s, e) => s + (e.vnd || 0), 0);
+  const whoLabel = filter.who === "all" ? "전체" : filter.who === "none" ? "미지정" : PEOPLE.find((p) => p.id === filter.who).name;
+  const payLabel = { all: "", card: " · 카드", cash: " · 현금" }[filter.pay];
+  $("#barLbl").textContent = `${whoLabel}${payLabel} 합계`;
+  $("#barKrw").textContent = fmt(krw) + "원";
+  const hasAir = list.some((e) => !isVietnam(e));
+  $("#barSub").innerHTML = `${list.length}건<br>${fmt(vnd)} ₫${hasAir ? " + 공항 원화" : ""}`;
+}
+
+function renderAll() {
+  renderPeople();
+  renderFilters();
+  renderList();
+  renderBar();
+}
+function renderSummaries() {
+  renderPeople();
+  renderFilters();
+  renderBar();
+}
+
+document.addEventListener("click", (ev) => {
+  const setBtn = ev.target.closest("[data-set]");
+  if (setBtn) {
+    const id = setBtn.dataset.id, who = setBtn.dataset.set;
+    if (state.a[id] === who) delete state.a[id]; else state.a[id] = who;
+    save();
+    // 필터가 걸려 있으면 목록에서 빠질 수 있으므로 전체를 다시 그림
+    if (filter.who !== "all") { renderAll(); return; }
+    const art = setBtn.closest(".entry");
+    art.dataset.who = state.a[id] || "";
+    art.querySelectorAll("[data-set]").forEach((b) => b.setAttribute("aria-checked", b.dataset.set === state.a[id]));
+    renderSummaries();
+    return;
+  }
+  const whoBtn = ev.target.closest("[data-who]:not(.entry)");
+  if (whoBtn) {
+    const w = whoBtn.dataset.who;
+    filter.who = whoBtn.classList.contains("person") && filter.who === w ? "all" : w;
+    renderAll();
+    if (!whoBtn.closest(".filters")) $(".filters").scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+  const payBtn = ev.target.closest("[data-pay]");
+  if (payBtn) { filter.pay = payBtn.dataset.pay; renderAll(); }
+});
+
+document.addEventListener("input", (ev) => {
+  const inp = ev.target.closest("[data-memo]");
+  if (!inp) return;
+  const chars = [...inp.value];
+  if (chars.length > MEMO_MAX) inp.value = chars.slice(0, MEMO_MAX).join("");
+  const v = inp.value.trim();
+  if (v) state.m[inp.dataset.memo] = inp.value; else delete state.m[inp.dataset.memo];
+  inp.nextElementSibling.textContent = `${[...inp.value].length}/${MEMO_MAX}`;
+  save();
+});
+
+$("#shareBtn").addEventListener("click", async () => {
+  const url = location.origin + location.pathname + "#s=" + encodeState();
+  try {
+    if (navigator.share && matchMedia("(pointer: coarse)").matches) {
+      await navigator.share({ title: "푸꾸옥 여행 정산", url });
+      return;
+    }
+    await navigator.clipboard.writeText(url);
+    toast("공유 링크를 복사했어요");
+  } catch (err) {
+    if (err && err.name === "AbortError") return;
+    prompt("아래 링크를 복사해 주세요", url);
+  }
+});
+$("#resetBtn").addEventListener("click", () => {
+  if (!confirm("모든 분류 선택과 메모를 지울까요?")) return;
+  state = { a: {}, m: {} };
+  save();
+  renderAll();
+  toast("초기화했어요");
+});
+
+load();
+importFromHash();
+renderStats();
+renderAll();
+</script>
+</body>
+</html>
