@@ -135,6 +135,10 @@ h2 { font-size: 17px; margin: 28px 0 10px; letter-spacing: -0.01em; }
 .assign button:disabled { cursor: not-allowed; opacity: .5; }
 
 .memo { margin-top: 8px; position: relative; }
+.memo-view { margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: var(--surface-2); font-size: 14px; white-space: pre-wrap; word-break: break-word; }
+.memo-view::before { content: "메모 · "; color: var(--muted); font-size: 12px; }
+.viewbar { margin-top: 14px; padding: 10px 14px; border-radius: 12px; background: var(--card-bg); color: var(--card); font-size: 13px; font-weight: 500; }
+body.view .admin-only { display: none; }
 .memo input {
   width: 100%; font: inherit; font-size: 16px; /* 16px: iOS 확대 방지 */
   padding: 8px 56px 8px 10px; border-radius: 10px; border: 1px solid var(--line);
@@ -213,11 +217,12 @@ footer { color: var(--muted); font-size: 12px; margin: 24px 0; }
       <div class="stat"><div class="lbl">카드 결제</div><div class="val num" id="sCard"></div><div class="val2 num" id="sCard2"></div></div>
       <div class="stat"><div class="lbl">현금 결제</div><div class="val num" id="sCash"></div><div class="val2 num" id="sCash2"></div></div>
     </div>
+    <div class="viewbar" id="viewbar" hidden>보기 전용 · 관리자가 공유한 정산 결과예요. 분류와 메모는 확인만 할 수 있어요.</div>
   </header>
 
   <h2>정산 (인천공항 포함)</h2>
   <div class="people" id="people"></div>
-  <p class="sub" style="margin-top:10px">여러 명을 선택하면 금액을 균등하게 나눠요. 세부 항목에서 따로 고르면 그 항목 금액은 항목 선택대로, 나머지는 결제 건 선택대로 계산해요.</p>
+  <p class="sub admin-only" style="margin-top:10px">여러 명을 선택하면 금액을 균등하게 나눠요. 세부 항목에서 따로 고르면 그 항목 금액은 항목 선택대로, 나머지는 결제 건 선택대로 계산해요.</p>
   <div class="unassigned" id="unassigned"></div>
 
   <div class="filters">
@@ -237,12 +242,15 @@ footer { color: var(--muted); font-size: 12px; margin: 24px 0; }
     <li><b>인천공항</b>: 출국 전 리브팜(31,200원, 우리카드)과 귀국 후 장기 주차(27,000원, 현금)는 원화 결제라 베트남 현지 합계에는 미포함, 정산 합계에는 포함.</li>
   </ul>
 
-  <h2>정산 데이터</h2>
+  <section class="admin-only">
+  <h2>정산 데이터 (관리자)</h2>
   <p class="sub">선택한 분류와 메모는 이 기기의 브라우저에 저장됩니다. 다른 사람과 맞추려면 공유 링크를 보내 주세요.</p>
   <div class="tools">
     <button class="btn primary" id="shareBtn" type="button">공유 링크 복사</button>
     <button class="btn" id="resetBtn" type="button">선택·메모 초기화</button>
   </div>
+  <p class="sub" style="margin-top:10px">공유 링크는 보기 전용이에요. 받은 사람은 분류와 메모를 확인만 할 수 있어요. 내용을 바꾼 뒤에는 링크를 다시 복사해서 보내 주세요.</p>
+  </section>
 
   <footer>작성일 2026.09.27 · 트래블월렛 이용내역, 현지 영수증, 인천공항 영수증 기준</footer>
 </div>
@@ -341,6 +349,9 @@ const EPS = 0.0001;
 let state = { a: {}, i: {}, m: {} };
 let filter = { who: "all", pay: "all" };
 const openDetails = new Set();
+// 공유 링크(#v=… 또는 예전 #s=…)로 열면 보기 전용
+const VIEW_MATCH = location.hash.match(/^#[vs]=(.+)$/);
+const VIEW = !!VIEW_MATCH;
 
 const $ = (s) => document.querySelector(s);
 const fmt = (n) => Math.round(n).toLocaleString("ko-KR");
@@ -353,12 +364,14 @@ const itemWeight = (it) => (it[5] ? null : it[3] ?? it[4]);
 const itemKey = (id, idx) => `${id}:${idx}`;
 
 function load() {
+  if (VIEW) return;
   try {
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) state = sanitize(JSON.parse(raw));
   } catch (_) {}
 }
 function save() {
+  if (VIEW) return;
   try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (_) {}
 }
 function sanitize(obj) {
@@ -394,20 +407,15 @@ function decodeState(str) {
   const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
   return sanitize(JSON.parse(new TextDecoder().decode(bytes)));
 }
-function importFromHash() {
-  const m = location.hash.match(/^#s=(.+)$/);
-  if (!m) return;
+function loadShared() {
+  if (!VIEW) return;
+  document.body.classList.add("view");
+  document.getElementById("viewbar").hidden = false;
   try {
-    const incoming = decodeState(m[1]);
-    if (isEmptyState() || confirm("공유 링크의 정산 내용으로 이 기기의 선택·메모를 덮어쓸까요?")) {
-      state = incoming;
-      save();
-      toast("공유된 정산 내용을 불러왔어요");
-    }
+    state = decodeState(VIEW_MATCH[1]);
   } catch (_) {
     toast("공유 링크를 읽지 못했어요");
   }
-  history.replaceState(null, "", location.pathname + location.search);
 }
 
 function toast(msg) {
@@ -511,6 +519,7 @@ function matches(e) {
 }
 
 function toggleButtons(sel, attrs, disabled) {
+  if (VIEW) return "";
   return PEOPLE.map((p) =>
     `<button type="button" class="p-${p.id}" ${attrs} data-set="${p.id}" aria-pressed="${sel.includes(p.id)}"${disabled ? " disabled" : ""}>${shortName(p)}</button>`
   ).join("");
@@ -530,7 +539,8 @@ function itemsHTML(e) {
     const sel = state.i[itemKey(e.id, idx)] || [];
     return `<div class="it${sub ? " sub" : ""}">
       <div class="it-top"><div>${sub ? "└ " : ""}${esc(vi)}${ko ? `<div class="k">${esc(ko)}</div>` : ""}</div><div class="it-amt">${amt}</div></div>
-      ${selectable ? `<div class="mini" role="group" aria-label="${esc(ko || vi)} 분류">${toggleButtons(sel, `data-id="${e.id}" data-item="${idx}"`, e.canceled)}</div>` : ""}
+      ${VIEW && sel.length ? `<div class="split">${sel.map((k) => `<span class="p-${k}">${shortName(PEOPLE.find((pp) => pp.id === k))}</span>`).join("")}</div>` : ""}
+      ${selectable && !VIEW ? `<div class="mini" role="group" aria-label="${esc(ko || vi)} 분류">${toggleButtons(sel, `data-id="${e.id}" data-item="${idx}"`, e.canceled)}</div>` : ""}
     </div>`;
   }).join("");
   return `<details class="items" data-for="${e.id}"${openDetails.has(e.id) ? " open" : ""}>
@@ -544,6 +554,7 @@ function splitHTML(e) {
   const a = alloc(e);
   const keys = [...PEOPLE.map((p) => p.id), "none"].filter((k) => Math.abs(a[k] || 0) > EPS);
   const touched = state.a[e.id] || (e.items || []).some((_, idx) => state.i[itemKey(e.id, idx)]);
+  if (VIEW && !e.canceled && !touched) return `<div class="split"><span class="none">미지정</span></div>`;
   if (!touched || !keys.length) return "";
   return `<div class="split">${keys.map((k) => {
     if (k === "none") return `<span class="none">미지정 <b class="num">${fmt(a[k])}원</b></span>`;
@@ -573,12 +584,12 @@ function entryHTML(e) {
       <div class="r">${amount}</div>
     </div>
     <div class="badges">${badges.join("")}</div>
-    <div class="assign" role="group" aria-label="${esc(e.ko)} 분류">${toggleButtons(sel, `data-id="${e.id}"`, e.canceled)}</div>
+    ${VIEW ? "" : `<div class="assign" role="group" aria-label="${esc(e.ko)} 분류">${toggleButtons(sel, `data-id="${e.id}"`, e.canceled)}</div>`}
     ${splitHTML(e)}
-    <div class="memo">
+    ${VIEW ? (memo ? `<div class="memo-view">${esc(memo)}</div>` : "") : `<div class="memo">
       <input type="text" data-memo="${e.id}" maxlength="${MEMO_MAX}" placeholder="메모 (최대 ${MEMO_MAX}자)" value="${esc(memo)}" aria-label="메모">
       <span class="cnt num">${[...memo].length}/${MEMO_MAX}</span>
-    </div>
+    </div>`}
     ${e.items ? itemsHTML(e) : ""}
   </article>`;
 }
@@ -629,7 +640,7 @@ document.addEventListener("toggle", (ev) => {
 
 document.addEventListener("click", (ev) => {
   const setBtn = ev.target.closest("[data-set]");
-  if (setBtn) {
+  if (setBtn && !VIEW) {
     const id = setBtn.dataset.id, who = setBtn.dataset.set;
     if (setBtn.dataset.item != null) toggleIn(state.i, itemKey(id, setBtn.dataset.item), who);
     else toggleIn(state.a, id, who);
@@ -657,7 +668,7 @@ document.addEventListener("click", (ev) => {
 
 document.addEventListener("input", (ev) => {
   const inp = ev.target.closest("[data-memo]");
-  if (!inp) return;
+  if (!inp || VIEW) return;
   const chars = [...inp.value];
   if (chars.length > MEMO_MAX) inp.value = chars.slice(0, MEMO_MAX).join("");
   if (inp.value.trim()) state.m[inp.dataset.memo] = inp.value; else delete state.m[inp.dataset.memo];
@@ -666,7 +677,7 @@ document.addEventListener("input", (ev) => {
 });
 
 $("#shareBtn").addEventListener("click", async () => {
-  const url = location.origin + location.pathname + "#s=" + encodeState();
+  const url = location.origin + location.pathname + "#v=" + encodeState();
   try {
     if (navigator.share && matchMedia("(pointer: coarse)").matches) {
       await navigator.share({ title: "푸꾸옥 여행 정산", url });
@@ -688,7 +699,7 @@ $("#resetBtn").addEventListener("click", () => {
 });
 
 load();
-importFromHash();
+loadShared();
 renderStats();
 renderAll();
 </script>
