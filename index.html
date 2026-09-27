@@ -108,6 +108,7 @@ h2 { font-size: 17px; margin: 28px 0 10px; letter-spacing: -0.01em; }
 .entry[data-who="s"] { border-left-color: var(--p-s); }
 .entry[data-who="j"] { border-left-color: var(--p-j); }
 .entry[data-who="c"] { border-left-color: var(--p-c); }
+.entry[data-who="multi"] { border-left-color: var(--text); }
 .entry.canceled { opacity: .65; }
 .top { display: flex; gap: 12px; justify-content: space-between; align-items: flex-start; }
 .top .l { min-width: 0; }
@@ -130,7 +131,7 @@ h2 { font-size: 17px; margin: 28px 0 10px; letter-spacing: -0.01em; }
   font: inherit; font-size: 13px; font-weight: 500; padding: 8px 0; border-radius: 10px; cursor: pointer;
   border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); min-height: 38px;
 }
-.assign button[aria-checked="true"] { background: var(--pc-bg); color: var(--pc); border-color: var(--pc); font-weight: 700; }
+.assign button[aria-pressed="true"] { background: var(--pc-bg); color: var(--pc); border-color: var(--pc); font-weight: 700; }
 .assign button:disabled { cursor: not-allowed; opacity: .5; }
 
 .memo { margin-top: 8px; position: relative; }
@@ -148,12 +149,21 @@ details.items summary { cursor: pointer; font-size: 13px; color: var(--muted); l
 details.items summary::-webkit-details-marker { display: none; }
 details.items summary::before { content: "▸"; font-size: 11px; transition: transform .15s; }
 details.items[open] summary::before { transform: rotate(90deg); }
-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
-th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 4px 4px 6px; border-bottom: 1px solid var(--line); }
-td { padding: 7px 4px; border-bottom: 1px dashed var(--line); vertical-align: top; }
-th.n, td.n { text-align: right; white-space: nowrap; }
-td .k { color: var(--muted); font-size: 12px; }
-tr.sub td:first-child { padding-left: 16px; }
+.it { padding: 9px 0; border-bottom: 1px dashed var(--line); }
+.it.sub { padding-left: 16px; }
+.it-top { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+.it-top .k { color: var(--muted); font-size: 12px; }
+.it-amt { text-align: right; white-space: nowrap; }
+.it-amt .v { color: var(--muted); font-size: 12px; }
+.mini { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+.mini button {
+  font: inherit; font-size: 12px; padding: 3px 10px; min-height: 30px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--muted);
+}
+.mini button[aria-pressed="true"] { background: var(--pc-bg); color: var(--pc); border-color: var(--pc); font-weight: 700; }
+.split { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 8px; font-size: 12.5px; }
+.split span { color: var(--pc); font-weight: 700; }
+.split span.none { color: var(--muted); font-weight: 500; }
 .inote { font-size: 12px; color: var(--muted); margin-top: 8px; }
 
 .empty { text-align: center; color: var(--muted); padding: 40px 0; }
@@ -207,6 +217,7 @@ footer { color: var(--muted); font-size: 12px; margin: 24px 0; }
 
   <h2>정산 (인천공항 포함)</h2>
   <div class="people" id="people"></div>
+  <p class="sub" style="margin-top:10px">여러 명을 선택하면 금액을 균등하게 나눠요. 세부 항목에서 따로 고르면 그 항목 금액은 항목 선택대로, 나머지는 결제 건 선택대로 계산해요.</p>
   <div class="unassigned" id="unassigned"></div>
 
   <div class="filters">
@@ -323,15 +334,21 @@ const ENTRIES = [
 
 const STORE_KEY = "pq-trip-2026-v1";
 const MEMO_MAX = 100;
-let state = { a: {}, m: {} };
+const EPS = 0.0001;
+// a: 결제 건별 선택 { id: ["h","s"] }, i: 세부 항목별 선택 { "id:항목번호": ["h"] }, m: 메모
+let state = { a: {}, i: {}, m: {} };
 let filter = { who: "all", pay: "all" };
+const openDetails = new Set();
 
 const $ = (s) => document.querySelector(s);
-const fmt = (n) => n.toLocaleString("ko-KR");
+const fmt = (n) => Math.round(n).toLocaleString("ko-KR");
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const payKind = (e) => PAY[e.pay].kind;
 const counted = (e) => !e.canceled;
 const isVietnam = (e) => e.day !== "air";
+const shortName = (p) => (p.id === "c" ? "공용" : p.name);
+const itemWeight = (it) => (it[5] ? null : it[3] ?? it[4]);
+const itemKey = (id, idx) => `${id}:${idx}`;
 
 function load() {
   try {
@@ -344,14 +361,23 @@ function save() {
 }
 function sanitize(obj) {
   const ids = new Set(ENTRIES.map((e) => e.id));
-  const who = new Set(PEOPLE.map((p) => p.id));
-  const out = { a: {}, m: {} };
+  const itemIds = new Set();
+  ENTRIES.forEach((e) => (e.items || []).forEach((it, idx) => itemWeight(it) != null && itemIds.add(itemKey(e.id, idx))));
+  const order = PEOPLE.map((p) => p.id);
+  // 이전 버전(단일 선택 문자열)도 배열로 변환
+  const cleanSel = (v) => {
+    const arr = Array.isArray(v) ? v : [v];
+    return order.filter((k) => arr.includes(k));
+  };
+  const out = { a: {}, i: {}, m: {} };
   if (obj && typeof obj === "object") {
-    for (const [k, v] of Object.entries(obj.a || {})) if (ids.has(k) && who.has(v)) out.a[k] = v;
+    for (const [k, v] of Object.entries(obj.a || {})) { const sel = cleanSel(v); if (ids.has(k) && sel.length) out.a[k] = sel; }
+    for (const [k, v] of Object.entries(obj.i || {})) { const sel = cleanSel(v); if (itemIds.has(k) && sel.length) out.i[k] = sel; }
     for (const [k, v] of Object.entries(obj.m || {})) if (ids.has(k) && typeof v === "string" && v) out.m[k] = [...v].slice(0, MEMO_MAX).join("");
   }
   return out;
 }
+const isEmptyState = () => !Object.keys(state.a).length && !Object.keys(state.i).length && !Object.keys(state.m).length;
 
 // 공유 링크: 상태를 URL 해시에 base64url로 담는다
 function encodeState() {
@@ -371,8 +397,7 @@ function importFromHash() {
   if (!m) return;
   try {
     const incoming = decodeState(m[1]);
-    const hasLocal = Object.keys(state.a).length || Object.keys(state.m).length;
-    if (!hasLocal || confirm("공유 링크의 정산 내용으로 이 기기의 선택·메모를 덮어쓸까요?")) {
+    if (isEmptyState() || confirm("공유 링크의 정산 내용으로 이 기기의 선택·메모를 덮어쓸까요?")) {
       state = incoming;
       save();
       toast("공유된 정산 내용을 불러왔어요");
@@ -391,6 +416,34 @@ function toast(msg) {
   toast._t = setTimeout(() => t.classList.remove("show"), 2200);
 }
 
+// 결제 1건의 원화 금액을 선택지별로 나눈다.
+// 세부 항목에 선택이 있으면 그 항목 금액은 항목 선택대로, 나머지는 결제 건 선택대로 균등 분할.
+function alloc(e) {
+  const out = {};
+  if (e.canceled) return out;
+  const add = (k, v) => (out[k] = (out[k] || 0) + v);
+  const base = e.vnd ?? e.krw;
+  let rest = e.krw;
+  (e.items || []).forEach((it, idx) => {
+    const sel = state.i[itemKey(e.id, idx)];
+    const w = itemWeight(it);
+    if (!sel || w == null) return;
+    const amt = (e.krw * w) / base;
+    rest -= amt;
+    sel.forEach((k) => add(k, amt / sel.length));
+  });
+  const sel = state.a[e.id] || [];
+  if (sel.length) sel.forEach((k) => add(k, rest / sel.length));
+  else if (Math.abs(rest) > EPS) add("none", rest);
+  return out;
+}
+// 현재 분류 필터 기준으로 이 결제 건에서 보여줄 원화 금액
+function amountFor(e) {
+  if (!counted(e)) return 0;
+  return filter.who === "all" ? e.krw : alloc(e)[filter.who] || 0;
+}
+const vndOf = (e, krw) => (e.vnd == null || !e.krw ? 0 : (krw * e.vnd) / e.krw);
+
 function renderStats() {
   const vn = ENTRIES.filter((e) => isVietnam(e) && counted(e));
   const sum = (arr, k) => arr.reduce((s, e) => s + e[k], 0);
@@ -405,13 +458,17 @@ function renderStats() {
 }
 
 function totalsFor(who) {
-  const list = ENTRIES.filter((e) => counted(e) && (state.a[e.id] || null) === who);
-  return { krw: list.reduce((s, e) => s + e.krw, 0), n: list.length };
+  let krw = 0, n = 0;
+  for (const e of ENTRIES) {
+    const v = alloc(e)[who];
+    if (v != null && Math.abs(v) > EPS) { krw += v; n++; }
+  }
+  return { krw, n };
 }
 
 function renderPeople() {
   const common = totalsFor("c");
-  const commonShare = Math.round(common.krw / 3);
+  const commonShare = common.krw / 3;
   $("#people").innerHTML = PEOPLE.map((p) => {
     const t = totalsFor(p.id);
     const share = p.id === "c"
@@ -424,14 +481,14 @@ function renderPeople() {
       ${share}
     </button>`;
   }).join("");
-  const un = totalsFor(null);
+  const un = totalsFor("none");
   $("#unassigned").innerHTML = un.n
-    ? `<span>아직 분류하지 않은 내역 <b class="num">${un.n}건 · ${fmt(un.krw)}원</b></span><button type="button" data-who="none">미지정만 보기</button>`
+    ? `<span>아직 분류하지 않은 금액 <b class="num">${un.n}건 · ${fmt(un.krw)}원</b></span><button type="button" data-who="none">미지정만 보기</button>`
     : `<span>모든 내역이 분류되었어요 ✓</span>`;
 }
 
 function renderFilters() {
-  const cntWho = (w) => ENTRIES.filter((e) => counted(e) && (w === "all" || (state.a[e.id] || "none") === w)).length;
+  const cntWho = (w) => ENTRIES.filter((e) => counted(e) && (w === "all" || Math.abs(alloc(e)[w] || 0) > EPS)).length;
   const whoOpts = [["all", "전체"], ...PEOPLE.map((p) => [p.id, p.name]), ["none", "미지정"]];
   $("#fWho").innerHTML = whoOpts.map(([k, l]) =>
     `<button type="button" class="chip" data-who="${k}" aria-pressed="${filter.who === k}">${l}<span class="c">${cntWho(k)}</span></button>`
@@ -446,14 +503,56 @@ function matches(e) {
   if (filter.pay !== "all" && payKind(e) !== filter.pay) return false;
   if (filter.who !== "all") {
     if (e.canceled) return false;
-    if ((state.a[e.id] || "none") !== filter.who) return false;
+    if (Math.abs(alloc(e)[filter.who] || 0) <= EPS) return false;
   }
   return true;
 }
 
+function toggleButtons(sel, attrs, disabled) {
+  return PEOPLE.map((p) =>
+    `<button type="button" class="p-${p.id}" ${attrs} data-set="${p.id}" aria-pressed="${sel.includes(p.id)}"${disabled ? " disabled" : ""}>${shortName(p)}</button>`
+  ).join("");
+}
+
+function itemsHTML(e) {
+  const krwOnly = e.vnd == null;
+  const nSel = e.items.filter((_, idx) => state.i[itemKey(e.id, idx)]).length;
+  const rows = e.items.map((it, idx) => {
+    const [vi, ko, q, v, k, sub] = it;
+    const selectable = itemWeight(it) != null;
+    const amt = sub
+      ? `<div class="v">세트 포함</div>`
+      : krwOnly
+        ? `<div class="num">${q > 1 ? `×${q} · ` : ""}${fmt(k)}원</div>`
+        : `<div class="num">${q > 1 ? `×${q} · ` : ""}${fmt(k)}원</div><div class="v num">${fmt(v)} ₫</div>`;
+    const sel = state.i[itemKey(e.id, idx)] || [];
+    return `<div class="it${sub ? " sub" : ""}">
+      <div class="it-top"><div>${sub ? "└ " : ""}${esc(vi)}${ko ? `<div class="k">${esc(ko)}</div>` : ""}</div><div class="it-amt">${amt}</div></div>
+      ${selectable ? `<div class="mini" role="group" aria-label="${esc(ko || vi)} 분류">${toggleButtons(sel, `data-id="${e.id}" data-item="${idx}"`, e.canceled)}</div>` : ""}
+    </div>`;
+  }).join("");
+  return `<details class="items" data-for="${e.id}"${openDetails.has(e.id) ? " open" : ""}>
+    <summary>세부 항목 ${e.items.length}개${nSel ? ` · 개별 분류 ${nSel}개` : ""}</summary>
+    ${rows}
+    ${e.note ? `<div class="inote">${esc(e.note)}</div>` : ""}
+  </details>`;
+}
+
+function splitHTML(e) {
+  const a = alloc(e);
+  const keys = [...PEOPLE.map((p) => p.id), "none"].filter((k) => Math.abs(a[k] || 0) > EPS);
+  const touched = state.a[e.id] || (e.items || []).some((_, idx) => state.i[itemKey(e.id, idx)]);
+  if (!touched || !keys.length) return "";
+  return `<div class="split">${keys.map((k) => {
+    if (k === "none") return `<span class="none">미지정 <b class="num">${fmt(a[k])}원</b></span>`;
+    const p = PEOPLE.find((pp) => pp.id === k);
+    return `<span class="p-${k}">${shortName(p)} <b class="num">${fmt(a[k])}원</b></span>`;
+  }).join("")}</div>`;
+}
+
 function entryHTML(e) {
   const p = PAY[e.pay];
-  const who = state.a[e.id] || "";
+  const sel = state.a[e.id] || [];
   const memo = state.m[e.id] || "";
   const badges = [`<span class="badge ${p.cls}">${p.label}</span>`];
   if (e.canceled) badges.push(`<span class="badge b-cancel">결제 취소</span>`);
@@ -461,22 +560,8 @@ function entryHTML(e) {
   const amount = e.vnd == null
     ? `<div class="vnd">KRW</div><div class="krw num">${fmt(e.krw)}원</div>`
     : `<div class="krw num">${fmt(e.krw)}원</div><div class="vnd num">${fmt(e.vnd)} ₫</div>`;
-  const assign = PEOPLE.map((pp) =>
-    `<button type="button" role="radio" class="p-${pp.id}" data-id="${e.id}" data-set="${pp.id}" aria-checked="${who === pp.id}"${e.canceled ? " disabled" : ""}>${pp.name === "공용 비용" ? "공용" : pp.name}</button>`
-  ).join("");
-  let items = "";
-  if (e.items) {
-    const krwOnly = e.vnd == null;
-    const rows = e.items.map(([vi, ko, q, v, k, sub]) => `<tr${sub ? ' class="sub"' : ""}>
-      <td>${sub ? "└ " : ""}${esc(vi)}${ko ? `<div class="k">${esc(ko)}</div>` : ""}</td>
-      <td class="n">${q}</td>
-      ${krwOnly ? "" : `<td class="n num">${v == null ? "포함" : fmt(v)}</td>`}
-      <td class="n num">${k == null ? "" : fmt(k)}</td></tr>`).join("");
-    items = `<details class="items"><summary>세부 항목 ${e.items.length}개</summary>
-      <table><thead><tr><th>${krwOnly ? "항목" : "항목 (현지어 / 한국어)"}</th><th class="n">수량</th>${krwOnly ? "" : '<th class="n">VND</th>'}<th class="n">${krwOnly ? "금액" : "KRW"}</th></tr></thead><tbody>${rows}</tbody></table>
-      ${e.note ? `<div class="inote">${esc(e.note)}</div>` : ""}</details>`;
-  }
-  return `<article class="entry${e.canceled ? " canceled" : ""}" data-who="${who}">
+  const whoAttr = sel.length > 1 ? "multi" : sel[0] || "";
+  return `<article class="entry${e.canceled ? " canceled" : ""}" data-entry="${e.id}" data-who="${whoAttr}">
     <div class="top">
       <div class="l">
         ${e.time ? `<div class="time">${e.time}</div>` : ""}
@@ -486,12 +571,13 @@ function entryHTML(e) {
       <div class="r">${amount}</div>
     </div>
     <div class="badges">${badges.join("")}</div>
-    <div class="assign" role="radiogroup" aria-label="${esc(e.ko)} 분류">${assign}</div>
+    <div class="assign" role="group" aria-label="${esc(e.ko)} 분류">${toggleButtons(sel, `data-id="${e.id}"`, e.canceled)}</div>
+    ${splitHTML(e)}
     <div class="memo">
       <input type="text" data-memo="${e.id}" maxlength="${MEMO_MAX}" placeholder="메모 (최대 ${MEMO_MAX}자)" value="${esc(memo)}" aria-label="메모">
       <span class="cnt num">${[...memo].length}/${MEMO_MAX}</span>
     </div>
-    ${items}
+    ${e.items ? itemsHTML(e) : ""}
   </article>`;
 }
 
@@ -500,8 +586,8 @@ function renderList() {
   for (const d of DAYS) {
     const list = ENTRIES.filter((e) => e.day === d.key && matches(e));
     if (!list.length) continue;
-    const krw = list.filter(counted).reduce((s, e) => s + e.krw, 0);
-    const vnd = list.filter(counted).reduce((s, e) => s + (e.vnd || 0), 0);
+    const krw = list.reduce((s, e) => s + amountFor(e), 0);
+    const vnd = list.reduce((s, e) => s + vndOf(e, amountFor(e)), 0);
     const tot = d.key === "air" ? `<b class="num">${fmt(krw)}원</b>` : `<span class="num">${fmt(vnd)} ₫</span> · <b class="num">${fmt(krw)}원</b>`;
     html.push(`<section class="day"><div class="dayhead"><div class="d">${d.label}<span class="rate">${d.rate}</span></div><div class="tot">${tot}</div></div>${list.map(entryHTML).join("")}</section>`);
   }
@@ -510,8 +596,8 @@ function renderList() {
 
 function renderBar() {
   const list = ENTRIES.filter((e) => counted(e) && matches(e));
-  const krw = list.reduce((s, e) => s + e.krw, 0);
-  const vnd = list.reduce((s, e) => s + (e.vnd || 0), 0);
+  const krw = list.reduce((s, e) => s + amountFor(e), 0);
+  const vnd = list.reduce((s, e) => s + vndOf(e, amountFor(e)), 0);
   const whoLabel = filter.who === "all" ? "전체" : filter.who === "none" ? "미지정" : PEOPLE.find((p) => p.id === filter.who).name;
   const payLabel = { all: "", card: " · 카드", cash: " · 현금" }[filter.pay];
   $("#barLbl").textContent = `${whoLabel}${payLabel} 합계`;
@@ -526,24 +612,33 @@ function renderAll() {
   renderList();
   renderBar();
 }
-function renderSummaries() {
-  renderPeople();
-  renderFilters();
-  renderBar();
+
+function toggleIn(obj, key, who) {
+  const cur = obj[key] || [];
+  const next = cur.includes(who) ? cur.filter((k) => k !== who) : PEOPLE.map((p) => p.id).filter((k) => k === who || cur.includes(k));
+  if (next.length) obj[key] = next; else delete obj[key];
 }
+
+document.addEventListener("toggle", (ev) => {
+  const d = ev.target;
+  if (!d.matches || !d.matches("details.items")) return;
+  if (d.open) openDetails.add(d.dataset.for); else openDetails.delete(d.dataset.for);
+}, true);
 
 document.addEventListener("click", (ev) => {
   const setBtn = ev.target.closest("[data-set]");
   if (setBtn) {
     const id = setBtn.dataset.id, who = setBtn.dataset.set;
-    if (state.a[id] === who) delete state.a[id]; else state.a[id] = who;
+    if (setBtn.dataset.item != null) toggleIn(state.i, itemKey(id, setBtn.dataset.item), who);
+    else toggleIn(state.a, id, who);
     save();
-    // 필터가 걸려 있으면 목록에서 빠질 수 있으므로 전체를 다시 그림
     if (filter.who !== "all") { renderAll(); return; }
+    // 전체 보기에서는 해당 카드만 다시 그려 스크롤·펼침 상태를 유지
     const art = setBtn.closest(".entry");
-    art.dataset.who = state.a[id] || "";
-    art.querySelectorAll("[data-set]").forEach((b) => b.setAttribute("aria-checked", b.dataset.set === state.a[id]));
-    renderSummaries();
+    art.outerHTML = entryHTML(ENTRIES.find((e) => e.id === id));
+    renderPeople();
+    renderFilters();
+    renderBar();
     return;
   }
   const whoBtn = ev.target.closest("[data-who]:not(.entry)");
@@ -563,8 +658,7 @@ document.addEventListener("input", (ev) => {
   if (!inp) return;
   const chars = [...inp.value];
   if (chars.length > MEMO_MAX) inp.value = chars.slice(0, MEMO_MAX).join("");
-  const v = inp.value.trim();
-  if (v) state.m[inp.dataset.memo] = inp.value; else delete state.m[inp.dataset.memo];
+  if (inp.value.trim()) state.m[inp.dataset.memo] = inp.value; else delete state.m[inp.dataset.memo];
   inp.nextElementSibling.textContent = `${[...inp.value].length}/${MEMO_MAX}`;
   save();
 });
@@ -585,7 +679,7 @@ $("#shareBtn").addEventListener("click", async () => {
 });
 $("#resetBtn").addEventListener("click", () => {
   if (!confirm("모든 분류 선택과 메모를 지울까요?")) return;
-  state = { a: {}, m: {} };
+  state = { a: {}, i: {}, m: {} };
   save();
   renderAll();
   toast("초기화했어요");
