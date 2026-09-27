@@ -242,9 +242,9 @@ footer { color: var(--muted); font-size: 12px; margin: 24px 0; }
 
   <h2>정리 기준</h2>
   <ul class="rules">
-    <li><b>환율</b>: 결제일(현지 날짜)의 VND→KRW 시장 기준환율. 9/18 0.05326 · 9/21 0.05283 · 9/22 0.05210 · 9/23 0.05249 (원/₫). 9/19·9/20은 주말로 직전 영업일(9/18) 환율 적용. 실제 카드사 청구 원화액과는 수수료·매입일 차이로 소폭 다를 수 있음.</li>
+    <li><b>환율</b>: 모든 베트남 동 결제에 1₫ = 0.05210원 (100₫ = 5.210원, 9/22 기준, 여행 기간 중 가장 낮은 환율) 일괄 적용.</li>
     <li><b>원화 환산</b>: 건별로 원 단위 반올림 후 합산. 세부 항목의 원화는 참고용이라 항목 합과 건 합계가 1~2원 다를 수 있음.</li>
-    <li><b>특이사항</b>: 냐방 레스토랑(588,000₫)은 카드내역에 ‘VNPAY*MANGOS SPA’로 표기됨. 베트남 프루츠 앤 모어(55,000₫)는 앱에 한국시간 기준 9/22로 표기되나 현지 9/21 결제라 9/21 환율 적용.</li>
+    <li><b>특이사항</b>: 냐방 레스토랑(588,000₫)은 카드내역에 ‘VNPAY*MANGOS SPA’로 표기됨. 베트남 프루츠 앤 모어(55,000₫)는 앱에 한국시간 기준 9/22로 표기되나 현지 9/21 결제.</li>
     <li><b>제외</b>: 트래블월렛 충전(+₫9,200,000)은 지출이 아니므로 제외. 그랩 290,160₫ 결제는 같은 날 전액 취소되어 0 처리.</li>
     <li><b>검산</b>: 트래블월렛 카드 사용액 8,544,388₫ = 총 충전 9,200,000₫ − 최종 잔액 655,612₫ (9/21 Gel Remos IB 연고 75,000₫ 추가 전 기준).</li>
     <li><b>인천공항</b>: 출국 전 리브팜(31,200원, 우리카드)과 귀국 후 장기 주차(27,000원, 현금)는 원화 결제라 베트남 현지 합계에는 미포함, 정산 합계에는 포함.</li>
@@ -293,12 +293,12 @@ const PAY = {
 };
 const DAYS = [
   { key: "air", label: "출국 전 · 인천공항", rate: "원화 결제 · 베트남 합계 미포함" },
-  { key: "0918", label: "2026.09.18 (금)", rate: "100₫ = 5.326원" },
-  { key: "0919", label: "2026.09.19 (토)", rate: "100₫ = 5.326원 (주말 · 9/18 적용)" },
-  { key: "0920", label: "2026.09.20 (일)", rate: "100₫ = 5.326원 (주말 · 9/18 적용)" },
-  { key: "0921", label: "2026.09.21 (월)", rate: "100₫ = 5.283원" },
-  { key: "0922", label: "2026.09.22 (화)", rate: "100₫ = 5.210원" },
-  { key: "0923", label: "2026.09.23 (수)", rate: "100₫ = 5.249원" },
+  { key: "0918", label: "2026.09.18 (금)", rate: "" },
+  { key: "0919", label: "2026.09.19 (토)", rate: "" },
+  { key: "0920", label: "2026.09.20 (일)", rate: "" },
+  { key: "0921", label: "2026.09.21 (월)", rate: "" },
+  { key: "0922", label: "2026.09.22 (화)", rate: "" },
+  { key: "0923", label: "2026.09.23 (수)", rate: "" },
   { key: "air2", label: "귀국 후 · 인천공항 (09.23)", rate: "원화 결제 · 베트남 합계 미포함" },
 ];
 // items: [현지어, 한국어, 수량, VND, KRW, 세트구성여부]
@@ -306,56 +306,56 @@ const ENTRIES = [
   { id: "air1", day: "air", time: "15:39", name: "리브팜", ko: "인천공항 제1여객터미널 면세구역", pay: "woori", vnd: null, krw: 31200, receipt: true,
     items: [["바질페스토 햄치즈 파니니", "", 1, null, 11800], ["에그치킨 샌드위치", "", 1, null, 9800], ["바질마요 치킨 샌드위치", "", 1, null, 9600]] },
 
-  { id: "e01", day: "0918", name: "Grab* 980c839fc57a217a", ko: "그랩 트래블패스 (할인 구독권)", pay: "travel", vnd: 25000, krw: 1332 },
-  { id: "e02", day: "0918", name: "Grab* A-9ROCMKVWWHEEAV", ko: "그랩 차량 이동", pay: "travel", vnd: 97760, krw: 5207 },
-  { id: "e03", day: "0918", name: "Grab* A-9ROCMKVWWHEEAV", ko: "그랩 차량 이동 (동일 건 추가 청구)", pay: "travel", vnd: 4160, krw: 222 },
+  { id: "e01", day: "0918", name: "Grab* 980c839fc57a217a", ko: "그랩 트래블패스 (할인 구독권)", pay: "travel", vnd: 25000, krw: 1303 },
+  { id: "e02", day: "0918", name: "Grab* A-9ROCMKVWWHEEAV", ko: "그랩 차량 이동", pay: "travel", vnd: 97760, krw: 5093 },
+  { id: "e03", day: "0918", name: "Grab* A-9ROCMKVWWHEEAV", ko: "그랩 차량 이동 (동일 건 추가 청구)", pay: "travel", vnd: 4160, krw: 217 },
 
-  { id: "e04", day: "0919", name: "Grab* A-9RQLOPRGW7OSAV", ko: "그랩 차량 이동", pay: "travel", vnd: 31200, krw: 1662 },
+  { id: "e04", day: "0919", name: "Grab* A-9RQLOPRGW7OSAV", ko: "그랩 차량 이동", pay: "travel", vnd: 31200, krw: 1626 },
   { id: "e05", day: "0919", name: "Grab* A-9RQQ3XCW2MV4AV", ko: "그랩 차량 이동 — 결제 후 전액 취소 (−290,160 / +290,160)", pay: "travel", vnd: 0, krw: 0, canceled: true },
-  { id: "e06", day: "0919", name: "KINGKONG PQ", ko: "킹콩마트 푸꾸옥 (대형마트)", pay: "travel", vnd: 1304000, krw: 69451 },
-  { id: "e07", day: "0919", name: "VNPAY XOM MOI GARDEN", ko: "쏨머이 가든 (베트남 식당)", pay: "travel", vnd: 680058, krw: 36220 },
-  { id: "e08", day: "0919", name: "Grab* A-9RRAR8TGWLPBAV", ko: "그랩 차량 이동", pay: "travel", vnd: 286000, krw: 15232 },
+  { id: "e06", day: "0919", name: "KINGKONG PQ", ko: "킹콩마트 푸꾸옥 (대형마트)", pay: "travel", vnd: 1304000, krw: 67938 },
+  { id: "e07", day: "0919", name: "VNPAY XOM MOI GARDEN", ko: "쏨머이 가든 (베트남 식당)", pay: "travel", vnd: 680058, krw: 35431 },
+  { id: "e08", day: "0919", name: "Grab* A-9RRAR8TGWLPBAV", ko: "그랩 차량 이동", pay: "travel", vnd: 286000, krw: 14901 },
 
-  { id: "e09", day: "0920", time: "19:05", name: "Cơm thố tay cầm Seafood & Meat BBQ", ko: "껌토 따이깜 해산물·고기 BBQ (손잡이 뚝배기밥 식당)", pay: "travel", vnd: 655000, krw: 34885, receipt: true,
-    items: [["Tôm thẻ kho tiêu", "흰다리새우 후추 뚝배기조림", 1, 185000, 9853], ["Mực tẩm bột chiên giòn", "오징어 튀김 (칼라마리)", 1, 185000, 9853], ["Rau muống xào tỏi", "모닝글로리 마늘볶음", 1, 70000, 3728], ["Cơm ghẹ Hàm Ninh", "함닌 꽃게살 볶음밥", 1, 165000, 8788], ["Saigon Special", "사이공 스페셜 맥주", 1, 30000, 1598], ["Mirinda xá xị", "미린다 사르사(루트비어맛) 탄산음료", 1, 20000, 1065]],
+  { id: "e09", day: "0920", time: "19:05", name: "Cơm thố tay cầm Seafood & Meat BBQ", ko: "껌토 따이깜 해산물·고기 BBQ (손잡이 뚝배기밥 식당)", pay: "travel", vnd: 655000, krw: 34126, receipt: true,
+    items: [["Tôm thẻ kho tiêu", "흰다리새우 후추 뚝배기조림", 1, 185000, 9639], ["Mực tẩm bột chiên giòn", "오징어 튀김 (칼라마리)", 1, 185000, 9639], ["Rau muống xào tỏi", "모닝글로리 마늘볶음", 1, 70000, 3647], ["Cơm ghẹ Hàm Ninh", "함닌 꽃게살 볶음밥", 1, 165000, 8597], ["Saigon Special", "사이공 스페셜 맥주", 1, 30000, 1563], ["Mirinda xá xị", "미린다 사르사(루트비어맛) 탄산음료", 1, 20000, 1042]],
     note: "카드내역 표기: COM THO TAY CAM · 리조트 앞 저녁식사" },
-  { id: "e10", day: "0920", time: "21:15", name: "SEN SPA", ko: "센 스파 (연꽃 스파)", pay: "cash", vnd: 1200000, krw: 63912, receipt: true,
-    items: [["Deep Tissue 60 (Lần)", "딥티슈 마사지 60분 (1회)", 1, 600000, 31956], ["Aloe Vera ice brewing (Lần)", "알로에베라 쿨링 진정 케어 (1회)", 1, 300000, 15978], ["Foot 30 (Lần)", "발 마사지 30분 (1회)", 1, 300000, 15978]] },
-  { id: "e11", day: "0920", time: "21:24", name: "Siêu thị Grand Mart 1", ko: "그랜드마트 1호점 (슈퍼마켓)", pay: "cash", vnd: 50000, krw: 2663, receipt: true,
-    items: [["Nước lê Sydney 1000ml (chai)", "시드니 배 주스 1L (병)", 1, 50000, 2663]], note: "영수증 결제수단: Tiền mặt(현금)" },
+  { id: "e10", day: "0920", time: "21:15", name: "SEN SPA", ko: "센 스파 (연꽃 스파)", pay: "cash", vnd: 1200000, krw: 62520, receipt: true,
+    items: [["Deep Tissue 60 (Lần)", "딥티슈 마사지 60분 (1회)", 1, 600000, 31260], ["Aloe Vera ice brewing (Lần)", "알로에베라 쿨링 진정 케어 (1회)", 1, 300000, 15630], ["Foot 30 (Lần)", "발 마사지 30분 (1회)", 1, 300000, 15630]] },
+  { id: "e11", day: "0920", time: "21:24", name: "Siêu thị Grand Mart 1", ko: "그랜드마트 1호점 (슈퍼마켓)", pay: "cash", vnd: 50000, krw: 2605, receipt: true,
+    items: [["Nước lê Sydney 1000ml (chai)", "시드니 배 주스 1L (병)", 1, 50000, 2605]], note: "영수증 결제수단: Tiền mặt(현금)" },
 
-  { id: "e12", day: "0921", name: "TONY MART", ko: "토니마트 (편의점·마트)", pay: "travel", vnd: 167000, krw: 8823 },
-  { id: "e13", day: "0921", name: "NCB*VIETNAM SELECT 2", ko: "베트남 셀렉트 2호점 (기념품·잡화점)", pay: "travel", vnd: 67000, krw: 3540 },
-  { id: "e28", day: "0921", name: "Gel Remos IB", ko: "레모스 IB 연고 (벌레 물림 연고)", pay: "travel", vnd: 75000, krw: 3962 },
-  { id: "e14", day: "0921", time: "18:45", name: "Cafe Green Sunset", ko: "카페 그린 선셋", pay: "cash", vnd: 440000, krw: 23245, receipt: true,
-    items: [["Green Set", "그린 세트 (아래 4종 구성)", 1, 440000, 23245], ["Bingsu xoài", "망고 빙수", 1, null, null, true], ["Bánh croffle xoài", "망고 크로플", 1, null, null, true], ["Sinh tố xoài", "망고 스무디", 1, null, null, true], ["Sinh tố dưa hấu", "수박 스무디", 1, null, null, true]],
+  { id: "e12", day: "0921", name: "TONY MART", ko: "토니마트 (편의점·마트)", pay: "travel", vnd: 167000, krw: 8701 },
+  { id: "e13", day: "0921", name: "NCB*VIETNAM SELECT 2", ko: "베트남 셀렉트 2호점 (기념품·잡화점)", pay: "travel", vnd: 67000, krw: 3491 },
+  { id: "e28", day: "0921", name: "Gel Remos IB", ko: "레모스 IB 연고 (벌레 물림 연고)", pay: "travel", vnd: 75000, krw: 3908 },
+  { id: "e14", day: "0921", time: "18:45", name: "Cafe Green Sunset", ko: "카페 그린 선셋", pay: "cash", vnd: 440000, krw: 22924, receipt: true,
+    items: [["Green Set", "그린 세트 (아래 4종 구성)", 1, 440000, 22924], ["Bingsu xoài", "망고 빙수", 1, null, null, true], ["Bánh croffle xoài", "망고 크로플", 1, null, null, true], ["Sinh tố xoài", "망고 스무디", 1, null, null, true], ["Sinh tố dưa hấu", "수박 스무디", 1, null, null, true]],
     note: "망고빙수 세트 · 영수증 결제수단: Thanh toán tiền mặt(현금)" },
-  { id: "e15", day: "0921", time: "21:55", name: "Crazy Good Phu Quoc Squid", ko: "크레이지 굿 푸꾸옥 오징어 (야시장)", pay: "travel", vnd: 240000, krw: 12679, receipt: true,
-    items: [["Khoai tây bò bằm phô mai", "다진 소고기 치즈 감자튀김", 1, 90000, 4755], ["Mực lá nướng muối ớt", "무늬오징어 소금·고추 구이", 1, 150000, 7924]],
+  { id: "e15", day: "0921", time: "21:55", name: "Crazy Good Phu Quoc Squid", ko: "크레이지 굿 푸꾸옥 오징어 (야시장)", pay: "travel", vnd: 240000, krw: 12504, receipt: true,
+    items: [["Khoai tây bò bằm phô mai", "다진 소고기 치즈 감자튀김", 1, 90000, 4689], ["Mực lá nướng muối ớt", "무늬오징어 소금·고추 구이", 1, 150000, 7815]],
     note: "카드내역 표기: CN CTY TNHH MT PQ TAI HT · 야시장 오징어, 감튀 · 부가세 8% 포함" },
-  { id: "e16", day: "0921", time: "22:20", name: "Vietnam Fruits & More", ko: "베트남 프루츠 앤 모어 (선셋타운 야시장 입구 상점)", pay: "travel", vnd: 55000, krw: 2906, receipt: true,
-    items: [["Xịt xua muỗi hương Lavender (Mentholatum Remos) 70ml", "멘소래담 레모스 모기기피 스프레이 라벤더향 70ml", 1, 55000, 2906]],
+  { id: "e16", day: "0921", time: "22:20", name: "Vietnam Fruits & More", ko: "베트남 프루츠 앤 모어 (선셋타운 야시장 입구 상점)", pay: "travel", vnd: 55000, krw: 2866, receipt: true,
+    items: [["Xịt xua muỗi hương Lavender (Mentholatum Remos) 70ml", "멘소래담 레모스 모기기피 스프레이 라벤더향 70ml", 1, 55000, 2866]],
     note: "카드내역 표기: NCB*VIETNAM SELECT 6 (앱 표기일 9/22) · 모기퇴치약" },
 
   { id: "e17", day: "0922", name: "Grab* A-9S4VXSCWW2CSAV", ko: "그랩 차량 이동", pay: "travel", vnd: 63440, krw: 3305 },
   { id: "e18", day: "0922", name: "NCB*THE LOUNGE", ko: "더 라운지 (카페·라운지)", pay: "travel", vnd: 119070, krw: 6204 },
 
-  { id: "e19", day: "0923", time: "12:14", name: "NCB*NWPQR_FO 02 (Khem Beach)", ko: "뉴월드 푸꾸옥 리조트 (켐 비치)", pay: "hyundai", vnd: 1213380, krw: 63690, receipt: true,
-    items: [["Room service", "룸서비스 (영수증에 세부 메뉴 없음)", 1, 1213380, 63690]], note: "룸서비스 · 트래블월렛이 아닌 현대카드로 결제" },
-  { id: "e20", day: "0923", name: "Grab* A-9SBE7OIGWUOVAV", ko: "그랩 차량 이동", pay: "travel", vnd: 283920, krw: 14903 },
-  { id: "e21", day: "0923", time: "16:15", name: "Nhà Vàng Restaurant", ko: "냐방 레스토랑 (‘황금집’ 식당)", pay: "travel", vnd: 588000, krw: 30864, receipt: true,
-    items: [["Thịt kho trứng", "돼지고기 계란 장조림", 1, 130000, 6824], ["Bánh xèo", "반쎄오 (베트남식 부침개)", 1, 130000, 6824], ["Cơm chiên hải sản", "해산물 볶음밥", 1, 130000, 6824], ["Mực chiên giòn", "오징어 튀김", 1, 170000, 8923], ["Phí cà thẻ", "카드 결제 수수료", 1, 28000, 1470]],
+  { id: "e19", day: "0923", time: "12:14", name: "NCB*NWPQR_FO 02 (Khem Beach)", ko: "뉴월드 푸꾸옥 리조트 (켐 비치)", pay: "hyundai", vnd: 1213380, krw: 63217, receipt: true,
+    items: [["Room service", "룸서비스 (영수증에 세부 메뉴 없음)", 1, 1213380, 63217]], note: "룸서비스 · 트래블월렛이 아닌 현대카드로 결제" },
+  { id: "e20", day: "0923", name: "Grab* A-9SBE7OIGWUOVAV", ko: "그랩 차량 이동", pay: "travel", vnd: 283920, krw: 14792 },
+  { id: "e21", day: "0923", time: "16:15", name: "Nhà Vàng Restaurant", ko: "냐방 레스토랑 (‘황금집’ 식당)", pay: "travel", vnd: 588000, krw: 30635, receipt: true,
+    items: [["Thịt kho trứng", "돼지고기 계란 장조림", 1, 130000, 6773], ["Bánh xèo", "반쎄오 (베트남식 부침개)", 1, 130000, 6773], ["Cơm chiên hải sản", "해산물 볶음밥", 1, 130000, 6773], ["Mực chiên giòn", "오징어 튀김", 1, 170000, 8857], ["Phí cà thẻ", "카드 결제 수수료", 1, 28000, 1459]],
     note: "카드내역 표기: VNPAY*MANGOS SPA · 카드 수수료 5% 포함" },
-  { id: "e22", day: "0923", time: "18:43", name: "HKD Little Win", ko: "리틀 윈 (개인사업자 마사지숍)", pay: "travel", vnd: 900000, krw: 47241, receipt: true,
-    items: [["Massage chân", "발 마사지", 1, 900000, 47241]], note: "카드내역 표기: HKD LITTLE WIN · 세부 항목 없는 카드 전표" },
-  { id: "e23", day: "0923", time: "18:57", name: "Kingkong Coffee Food Court", ko: "킹콩커피 푸드코트 (즈엉동)", pay: "travel", vnd: 173600, krw: 9112, receipt: true,
-    items: [["Sinh tố xoài (Mango smoothie)", "망고 스무디", 2, 158000, 8293], ["Bạc xỉu đá (White coffee – Ice)", "박씨우 아이스 (연유 화이트커피)", 1, 59000, 3097], ["Phiếu giảm giá hội viên", "회원 할인 쿠폰 (20%)", 1, -43400, -2278]],
+  { id: "e22", day: "0923", time: "18:43", name: "HKD Little Win", ko: "리틀 윈 (개인사업자 마사지숍)", pay: "travel", vnd: 900000, krw: 46890, receipt: true,
+    items: [["Massage chân", "발 마사지", 1, 900000, 46890]], note: "카드내역 표기: HKD LITTLE WIN · 세부 항목 없는 카드 전표" },
+  { id: "e23", day: "0923", time: "18:57", name: "Kingkong Coffee Food Court", ko: "킹콩커피 푸드코트 (즈엉동)", pay: "travel", vnd: 173600, krw: 9045, receipt: true,
+    items: [["Sinh tố xoài (Mango smoothie)", "망고 스무디", 2, 158000, 8232], ["Bạc xỉu đá (White coffee – Ice)", "박씨우 아이스 (연유 화이트커피)", 1, 59000, 3074], ["Phiếu giảm giá hội viên", "회원 할인 쿠폰 (20%)", 1, -43400, -2261]],
     note: "카드내역 표기: KINGKONG COFFEE" },
-  { id: "e24", day: "0923", name: "KINGKONG PQ", ko: "킹콩마트 푸꾸옥 (대형마트)", pay: "travel", vnd: 946500, krw: 49682 },
-  { id: "e25", day: "0923", name: "KINGKONG PQ", ko: "킹콩마트 푸꾸옥 (대형마트)", pay: "travel", vnd: 1736000, krw: 91123 },
-  { id: "e26", day: "0923", name: "Grab* A-9SCO5VXGWXBIAV", ko: "그랩 차량 이동", pay: "travel", vnd: 113360, krw: 5950 },
+  { id: "e24", day: "0923", name: "KINGKONG PQ", ko: "킹콩마트 푸꾸옥 (대형마트)", pay: "travel", vnd: 946500, krw: 49313 },
+  { id: "e25", day: "0923", name: "KINGKONG PQ", ko: "킹콩마트 푸꾸옥 (대형마트)", pay: "travel", vnd: 1736000, krw: 90446 },
+  { id: "e26", day: "0923", name: "Grab* A-9SCO5VXGWXBIAV", ko: "그랩 차량 이동", pay: "travel", vnd: 113360, krw: 5906 },
   { id: "air2", day: "air2", name: "인천공항 장기 주차", ko: "인천공항 장기주차장 (귀국 후 출차)", pay: "cash", vnd: null, krw: 27000 },
-  { id: "e27", day: "0923", name: "Grab* A-9SCO5VXGWXBIAV", ko: "그랩 차량 이동 (동일 건 추가 청구)", pay: "travel", vnd: 8320, krw: 437 },
+  { id: "e27", day: "0923", name: "Grab* A-9SCO5VXGWXBIAV", ko: "그랩 차량 이동 (동일 건 추가 청구)", pay: "travel", vnd: 8320, krw: 433 },
 ];
 
 const STORE_KEY = "pq-trip-2026-v1";
