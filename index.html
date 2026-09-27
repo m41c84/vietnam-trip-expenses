@@ -234,7 +234,7 @@ footer { color: var(--muted); font-size: 12px; margin: 24px 0; }
     <li><b>특이사항</b>: 냐방 레스토랑(588,000₫)은 카드내역에 ‘VNPAY*MANGOS SPA’로 표기됨. 베트남 프루츠 앤 모어(55,000₫)는 앱에 한국시간 기준 9/22로 표기되나 현지 9/21 결제라 9/21 환율 적용.</li>
     <li><b>제외</b>: 트래블월렛 충전(+₫9,200,000)은 지출이 아니므로 제외. 그랩 290,160₫ 결제는 같은 날 전액 취소되어 0 처리.</li>
     <li><b>검산</b>: 트래블월렛 카드 사용액 8,544,388₫ = 총 충전 9,200,000₫ − 최종 잔액 655,612₫.</li>
-    <li><b>인천공항</b>: 출국 전 원화 결제(31,200원)는 베트남 현지 합계에는 미포함, 정산 합계에는 포함.</li>
+    <li><b>인천공항</b>: 출국 전 리브팜(31,200원, 우리카드)과 귀국 후 장기 주차(27,000원, 현금)는 원화 결제라 베트남 현지 합계에는 미포함, 정산 합계에는 포함.</li>
   </ul>
 
   <h2>정산 데이터</h2>
@@ -276,6 +276,7 @@ const DAYS = [
   { key: "0921", label: "2026.09.21 (월)", rate: "100₫ = 5.283원" },
   { key: "0922", label: "2026.09.22 (화)", rate: "100₫ = 5.210원" },
   { key: "0923", label: "2026.09.23 (수)", rate: "100₫ = 5.249원" },
+  { key: "air2", label: "귀국 후 · 인천공항 (09.23)", rate: "원화 결제 · 베트남 합계 미포함" },
 ];
 // items: [현지어, 한국어, 수량, VND, KRW, 세트구성여부]
 const ENTRIES = [
@@ -329,6 +330,7 @@ const ENTRIES = [
   { id: "e24", day: "0923", name: "KINGKONG PQ", ko: "킹콩마트 푸꾸옥 (대형마트)", pay: "travel", vnd: 946500, krw: 49682 },
   { id: "e25", day: "0923", name: "KINGKONG PQ", ko: "킹콩마트 푸꾸옥 (대형마트)", pay: "travel", vnd: 1736000, krw: 91123 },
   { id: "e26", day: "0923", name: "Grab* A-9SCO5VXGWXBIAV", ko: "그랩 차량 이동", pay: "travel", vnd: 113360, krw: 5950 },
+  { id: "air2", day: "air2", name: "인천공항 장기 주차", ko: "인천공항 장기주차장 (귀국 후 출차)", pay: "cash", vnd: null, krw: 27000 },
   { id: "e27", day: "0923", name: "Grab* A-9SCO5VXGWXBIAV", ko: "그랩 차량 이동 (동일 건 추가 청구)", pay: "travel", vnd: 8320, krw: 437 },
 ];
 
@@ -345,7 +347,7 @@ const fmt = (n) => Math.round(n).toLocaleString("ko-KR");
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const payKind = (e) => PAY[e.pay].kind;
 const counted = (e) => !e.canceled;
-const isVietnam = (e) => e.day !== "air";
+const isVietnam = (e) => !e.day.startsWith("air");
 const shortName = (p) => (p.id === "c" ? "공용" : p.name);
 const itemWeight = (it) => (it[5] ? null : it[3] ?? it[4]);
 const itemKey = (id, idx) => `${id}:${idx}`;
@@ -556,7 +558,7 @@ function entryHTML(e) {
   const memo = state.m[e.id] || "";
   const badges = [`<span class="badge ${p.cls}">${p.label}</span>`];
   if (e.canceled) badges.push(`<span class="badge b-cancel">결제 취소</span>`);
-  else badges.push(`<span class="badge b-soft">${e.receipt ? "영수증 있음" : "카드내역 (영수증 없음)"}</span>`);
+  else if (e.receipt || payKind(e) === "card") badges.push(`<span class="badge b-soft">${e.receipt ? "영수증 있음" : "카드내역 (영수증 없음)"}</span>`);
   const amount = e.vnd == null
     ? `<div class="vnd">KRW</div><div class="krw num">${fmt(e.krw)}원</div>`
     : `<div class="krw num">${fmt(e.krw)}원</div><div class="vnd num">${fmt(e.vnd)} ₫</div>`;
@@ -588,7 +590,7 @@ function renderList() {
     if (!list.length) continue;
     const krw = list.reduce((s, e) => s + amountFor(e), 0);
     const vnd = list.reduce((s, e) => s + vndOf(e, amountFor(e)), 0);
-    const tot = d.key === "air" ? `<b class="num">${fmt(krw)}원</b>` : `<span class="num">${fmt(vnd)} ₫</span> · <b class="num">${fmt(krw)}원</b>`;
+    const tot = d.key.startsWith("air") ? `<b class="num">${fmt(krw)}원</b>` : `<span class="num">${fmt(vnd)} ₫</span> · <b class="num">${fmt(krw)}원</b>`;
     html.push(`<section class="day"><div class="dayhead"><div class="d">${d.label}<span class="rate">${d.rate}</span></div><div class="tot">${tot}</div></div>${list.map(entryHTML).join("")}</section>`);
   }
   $("#list").innerHTML = html.length ? html.join("") : `<div class="empty">조건에 맞는 결제 내역이 없어요</div>`;
