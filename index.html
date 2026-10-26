@@ -5,16 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>푸꾸옥 여행 정산</title>
 <meta name="description" content="베트남 푸꾸옥 여행(2026.09.18~09.23) 결제 내역 정리 및 정산">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="topbar">
   <div class="in">
-    <span class="brand"><span class="mark" aria-hidden="true">푸</span>푸꾸옥 정산</span>
+    <span class="brand">푸꾸옥 정산</span>
     <span class="saved-at num" id="savedAt"></span>
   </div>
 </header>
@@ -26,15 +23,19 @@
       <p class="meta"><span>2026.09.18 (금)부터 09.23 (수)까지</span><span>금액: 베트남 동(₫), 원(KRW)</span></p>
     </section>
 
-    <section class="card totals" aria-label="지출 합계">
-      <div class="total total--main"><div class="lbl">베트남 현지 총 지출</div><div class="fig num" id="sTotal"></div><div class="sub2 num" id="sTotal2"></div></div>
-      <div class="total"><div class="lbl">카드 결제</div><div class="fig num" id="sCard"></div><div class="sub2 num" id="sCard2"></div></div>
-      <div class="total"><div class="lbl">현금 결제</div><div class="fig num" id="sCash"></div><div class="sub2 num" id="sCash2"></div></div>
-    </section>
+    <dl class="trip" aria-label="지출 합계">
+      <div class="total total--main"><dt class="lbl">베트남 현지 총 지출</dt><dd class="fig num" id="sTotal"></dd><dd class="sub2 num" id="sTotal2"></dd></div>
+      <div class="total"><dt class="lbl">카드 결제</dt><dd class="fig num" id="sCard"></dd><dd class="sub2 num" id="sCard2"></dd></div>
+      <div class="total"><dt class="lbl">현금 결제</dt><dd class="fig num" id="sCash"></dd><dd class="sub2 num" id="sCash2"></dd></div>
+    </dl>
 
-    <section class="card" aria-labelledby="settle">
-      <div class="sec"><h2 id="settle">정산 (인천공항 포함)</h2><span class="aside num" id="settleTotal"></span></div>
+    <section class="receipt" aria-labelledby="settle">
+      <div class="rc-head">
+        <h2 id="settle">정산 영수증</h2>
+        <p class="rc-sub">인천공항 결제 포함, 이름을 누르면 그 사람 내역만 보여요</p>
+      </div>
       <div id="people"><p class="loading">불러오는 중…</p></div>
+      <div class="rc-total"><span>합계</span><b class="num" id="settleTotal"></b></div>
       <div class="unassigned" id="unassigned"></div>
     </section>
 
@@ -458,18 +459,20 @@ function renderPeople() {
   const common = totalsFor("c");
   const commonShare = common.krw / 3;
   const all = ENTRIES.filter(counted).reduce((sum, e) => sum + e.krw, 0);
-  $("#settleTotal").textContent = `합계 ${fmt(all)}원`;
-  $("#people").innerHTML = PEOPLE.map((p) => {
-    const t = totalsFor(p.id);
-    const owe = p.id === "c" ? commonShare : t.krw + commonShare;
-    const pct = all ? Math.min(100, (owe / all) * 100) : 0;
-    return `<button type="button" class="person p-${p.id}" data-who="${p.id}" aria-pressed="${filter.who === p.id}">
-      <span class="av" aria-hidden="true">${initial(p.id)}</span>
-      <span><span class="nm">${p.name}</span><br><span class="own num">${p.id === "c" ? "" : "개인 "}${fmt(t.krw)}원, ${t.n}건</span></span>
-      <span class="owe num"><b>${fmt(owe)}원</b><small>${p.id === "c" ? "1인당 (÷3)" : "공용÷3 포함"}</small></span>
-      ${p.id === "c" ? "" : `<span class="share" aria-hidden="true"><i style="width:${pct.toFixed(1)}%"></i></span>`}
+  $("#settleTotal").textContent = `${fmt(all)}원`;
+  const line = (p, owe, detail) => `<button type="button" class="person p-${p.id}" data-who="${p.id}" aria-pressed="${filter.who === p.id}">
+      <span class="nm"><span class="av" aria-hidden="true">${initial(p.id)}</span>${p.name}</span>
+      <span class="lead" aria-hidden="true"></span>
+      <b class="owe num">${fmt(owe)}원</b>
+      <span class="own num">${detail}</span>
     </button>`;
-  }).join("");
+  const c = PEOPLE.find((p) => p.id === "c");
+  $("#people").innerHTML =
+    line(c, common.krw, `${common.n}건, 3명이 ${fmt(commonShare)}원씩 나눠 내요`) +
+    PEOPLE.filter((p) => p.id !== "c").map((p) => {
+      const t = totalsFor(p.id);
+      return line(p, t.krw + commonShare, `개인 ${fmt(t.krw)}원 (${t.n}건) + 공용 ${fmt(commonShare)}원`);
+    }).join("");
   const un = totalsFor("none");
   const box = $("#unassigned");
   box.classList.toggle("late", un.n > 0);
@@ -477,7 +480,6 @@ function renderPeople() {
     ? `<span>아직 분류하지 않은 금액 <b class="num">${un.n}건, ${fmt(un.krw)}원</b></span><button type="button" class="btn" data-who="none">미지정만 보기</button>`
     : `<span>모든 내역이 분류되었어요</span>`;
 }
-
 function renderFilters() {
   const cntWho = (w) => ENTRIES.filter((e) => counted(e) && (w === "all" || Math.abs(alloc(e)[w] || 0) > EPS)).length;
   const whoOpts = [["all", "전체"], ...PEOPLE.map((p) => [p.id, p.name]), ["none", "미지정"]];
