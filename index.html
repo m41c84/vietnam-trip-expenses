@@ -5,10 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>푸꾸옥 여행 정산</title>
 <meta name="description" content="베트남 푸꾸옥 여행(2026.09.18~09.23) 결제 내역 정리 및 정산">
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <filter id="press" x="-10%" y="-20%" width="120%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="4" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.25" result="mask"/>
+    <feComposite in="SourceGraphic" in2="mask" operator="in"/>
+  </filter>
+</svg>
 <header class="topbar">
   <div class="container">
     <span class="wordmark">푸꾸옥 정산</span>
@@ -462,9 +474,10 @@ function renderPeople() {
   const un = totalsFor("none");
   const box = $("#unassigned");
   box.classList.toggle("late", un.n > 0);
+  box.classList.toggle("settled", un.n === 0);
   box.innerHTML = un.n
     ? `<span>아직 분류하지 않은 금액 <b class="num">${un.n}건, ${fmt(un.krw)}원</b></span><button type="button" data-who="none">미지정만 보기</button>`
-    : `<span>모든 내역이 분류되었어요</span>`;
+    : `<span>정산 완료</span>`;
 }
 
 function renderFilters() {
