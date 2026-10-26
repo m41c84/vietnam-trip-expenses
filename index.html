@@ -7,230 +7,37 @@
 <meta name="description" content="베트남 푸꾸옥 여행(2026.09.18~09.23) 결제 내역 정리 및 정산">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #f4f5f7;
-  --surface: #ffffff;
-  --surface-2: #f0f2f5;
-  --text: #1b1f27;
-  --muted: #6b7280;
-  --line: #e3e6eb;
-  --ink: #1e2430;
-  --ink-text: #ffffff;
-  --card: #2563eb;  --card-bg: #e7efff;
-  --hy: #7c3aed;    --hy-bg: #f0e9ff;
-  --cash: #d9480f;  --cash-bg: #fff0e6;
-  --cancel: #dc2626; --cancel-bg: #fde8e8;
-  --p-h: #db2777; --p-h-bg: #fde7f2;
-  --p-s: #0891b2; --p-s-bg: #e0f6fb;
-  --p-j: #16a34a; --p-j-bg: #e3f6e9;
-  --p-c: #475569; --p-c-bg: #e8ecf1;
-  --shadow: 0 1px 2px rgba(16,24,40,.05);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0f1115; --surface: #181b21; --surface-2: #20242c; --text: #e8eaee; --muted: #9aa1ad; --line: #2b3039;
-    --ink: #2a3140; --ink-text: #ffffff;
-    --card: #7aa7ff; --card-bg: #1c2a47; --hy: #b69cff; --hy-bg: #2a2144;
-    --cash: #ff9a5c; --cash-bg: #3a2415; --cancel: #ff7b7b; --cancel-bg: #3a1a1a;
-    --p-h: #ff7eb9; --p-h-bg: #3d1a2c; --p-s: #5fd3ea; --p-s-bg: #133239;
-    --p-j: #5ad785; --p-j-bg: #15311f; --p-c: #aab6c6; --p-c-bg: #262d37;
-    --shadow: none;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0f1115; --surface: #181b21; --surface-2: #20242c; --text: #e8eaee; --muted: #9aa1ad; --line: #2b3039;
-  --ink: #2a3140; --ink-text: #ffffff;
-  --card: #7aa7ff; --card-bg: #1c2a47; --hy: #b69cff; --hy-bg: #2a2144;
-  --cash: #ff9a5c; --cash-bg: #3a2415; --cancel: #ff7b7b; --cancel-bg: #3a1a1a;
-  --p-h: #ff7eb9; --p-h-bg: #3d1a2c; --p-s: #5fd3ea; --p-s-bg: #133239;
-  --p-j: #5ad785; --p-j-bg: #15311f; --p-c: #aab6c6; --p-c-bg: #262d37;
-  --shadow: none;
-}
-* { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
-body {
-  margin: 0; background: var(--bg); color: var(--text);
-  font-family: "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
-  font-size: 15px; line-height: 1.5;
-  padding-bottom: calc(76px + env(safe-area-inset-bottom));
-}
-.wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
-.num { font-variant-numeric: tabular-nums; }
-header { padding: 28px 0 8px; }
-h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -0.02em; }
-.sub { color: var(--muted); font-size: 13px; margin: 0; }
-h2 { font-size: 17px; margin: 28px 0 10px; letter-spacing: -0.01em; }
-
-.stats { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 10px; margin-top: 16px; }
-.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); }
-.stat.main { background: var(--ink); color: var(--ink-text); border-color: transparent; }
-.stat .lbl { font-size: 12px; opacity: .75; }
-.stat .val { font-size: 22px; font-weight: 700; margin-top: 2px; letter-spacing: -0.02em; }
-.stat .val2 { font-size: 12px; opacity: .7; }
-
-.people { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.person {
-  background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px;
-  text-align: left; cursor: pointer; font: inherit; color: inherit; box-shadow: var(--shadow);
-  border-top: 4px solid var(--pc);
-}
-.person[aria-pressed="true"] { outline: 2px solid var(--pc); outline-offset: -1px; }
-.person .nm { font-size: 13px; font-weight: 700; color: var(--pc); }
-.person .amt { font-size: 19px; font-weight: 700; margin-top: 2px; letter-spacing: -0.02em; }
-.person .cnt { font-size: 12px; color: var(--muted); }
-.person .share { font-size: 12px; color: var(--muted); margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--line); }
-.person .share b { color: var(--text); }
-.unassigned { margin-top: 8px; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
-.unassigned button { font: inherit; background: none; border: none; color: var(--card); padding: 0; cursor: pointer; text-decoration: underline; }
-
-.filters { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 10px 0; margin-top: 8px; border-bottom: 1px solid var(--line); }
-.chiprow { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px 0; }
-.chiprow::-webkit-scrollbar { display: none; }
-.chiprow + .chiprow { margin-top: 6px; }
-.chip {
-  flex: none; font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
-  border: 1px solid var(--line); background: var(--surface); color: var(--text);
-}
-.chip[aria-pressed="true"] { background: var(--ink); color: var(--ink-text); border-color: var(--ink); }
-.chip .c { opacity: .6; margin-left: 3px; }
-
-.day { margin-top: 22px; }
-.dayhead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; padding-bottom: 8px; border-bottom: 2px solid var(--text); margin-bottom: 10px; }
-.dayhead .d { font-weight: 700; font-size: 17px; }
-.dayhead .rate { color: var(--muted); font-size: 12px; margin-left: 6px; font-weight: 400; }
-.dayhead .tot { font-size: 14px; }
-.dayhead .tot b { font-size: 15px; }
-
-.entry { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow); border-left: 4px solid var(--line); }
-.entry[data-who="h"] { border-left-color: var(--p-h); }
-.entry[data-who="s"] { border-left-color: var(--p-s); }
-.entry[data-who="j"] { border-left-color: var(--p-j); }
-.entry[data-who="c"] { border-left-color: var(--p-c); }
-.entry[data-who="multi"] { border-left-color: var(--text); }
-.entry.canceled { opacity: .65; }
-.top { display: flex; gap: 12px; justify-content: space-between; align-items: flex-start; }
-.top .l { min-width: 0; }
-.time { font-size: 12px; color: var(--muted); font-weight: 500; }
-.name { font-weight: 700; font-size: 15px; word-break: break-word; }
-.ko { color: var(--muted); font-size: 13px; }
-.top .r { text-align: right; flex: none; }
-.krw { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; white-space: nowrap; }
-.vnd { font-size: 12px; color: var(--muted); white-space: nowrap; }
-.badges { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
-.badge { font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
-.b-card { color: var(--card); background: var(--card-bg); }
-.b-hy { color: var(--hy); background: var(--hy-bg); }
-.b-cash { color: var(--cash); background: var(--cash-bg); }
-.b-cancel { color: var(--cancel); background: var(--cancel-bg); }
-.b-soft { color: var(--muted); background: var(--surface-2); font-weight: 500; }
-
-.assign { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 12px; }
-.assign button {
-  font: inherit; font-size: 13px; font-weight: 500; padding: 8px 0; border-radius: 10px; cursor: pointer;
-  border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); min-height: 38px;
-}
-.assign button[aria-pressed="true"] { background: var(--pc-bg); color: var(--pc); border-color: var(--pc); font-weight: 700; }
-.assign button:disabled { cursor: not-allowed; opacity: .5; }
-
-.memo { margin-top: 8px; position: relative; }
-.memo-view { margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: var(--surface-2); font-size: 14px; white-space: pre-wrap; word-break: break-word; }
-.memo-view::before { content: "메모 · "; color: var(--muted); font-size: 12px; }
-.titlerow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.saved-at { flex: none; font-size: 12px; color: var(--muted); white-space: nowrap; }
-body.view .admin-only { display: none; }
-body:not(.view) .view-only { display: none; }
-.savebar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; padding: 8px 10px 8px 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); font-size: 13px; }
-.savebar.dirty { border-color: var(--cash); background: var(--cash-bg); color: var(--cash); font-weight: 500; }
-.savebar .btn { padding: 6px 14px; flex: none; }
-.token { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-.token input { flex: 1 1 220px; font: inherit; font-size: 16px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--text); }
-.sub a { color: var(--card); }
-.memo input {
-  width: 100%; font: inherit; font-size: 16px; /* 16px: iOS 확대 방지 */
-  padding: 8px 56px 8px 10px; border-radius: 10px; border: 1px solid var(--line);
-  background: var(--surface); color: var(--text);
-}
-.memo input::placeholder { color: var(--muted); opacity: .8; }
-.memo input:focus { outline: 2px solid var(--card); outline-offset: -1px; }
-.memo .cnt { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--muted); pointer-events: none; }
-
-details.items { margin-top: 10px; }
-details.items summary { cursor: pointer; font-size: 13px; color: var(--muted); list-style: none; display: inline-flex; align-items: center; gap: 4px; }
-details.items summary::-webkit-details-marker { display: none; }
-details.items summary::before { content: "▸"; font-size: 11px; transition: transform .15s; }
-details.items[open] summary::before { transform: rotate(90deg); }
-.it { padding: 9px 0; border-bottom: 1px dashed var(--line); }
-.it.sub { padding-left: 16px; }
-.it-top { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
-.it-top .k { color: var(--muted); font-size: 12px; }
-.it-amt { text-align: right; white-space: nowrap; }
-.it-amt .v { color: var(--muted); font-size: 12px; }
-.mini { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
-.mini button {
-  font: inherit; font-size: 12px; padding: 3px 10px; min-height: 30px; border-radius: 999px; cursor: pointer;
-  border: 1px solid var(--line); background: var(--surface-2); color: var(--muted);
-}
-.mini button[aria-pressed="true"] { background: var(--pc-bg); color: var(--pc); border-color: var(--pc); font-weight: 700; }
-.split { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 8px; font-size: 12.5px; }
-.split span { color: var(--pc); font-weight: 700; }
-.split span.none { color: var(--muted); font-weight: 500; }
-.inote { font-size: 12px; color: var(--muted); margin-top: 8px; }
-
-.empty { text-align: center; color: var(--muted); padding: 40px 0; }
-
-.rules { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 6px 18px; font-size: 13px; color: var(--muted); }
-.rules li { margin: 8px 0; }
-.rules b { color: var(--text); }
-.tools { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-.btn { font: inherit; font-size: 13px; padding: 8px 14px; border-radius: 10px; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--text); }
-.btn.primary { background: var(--ink); color: var(--ink-text); border-color: var(--ink); }
-footer { color: var(--muted); font-size: 12px; margin: 24px 0; }
-
-.bar {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
-  background: var(--ink); color: var(--ink-text);
-  padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
-}
-.bar .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.bar .lbl { font-size: 12px; opacity: .75; }
-.bar .big { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
-.bar .r { text-align: right; font-size: 12px; opacity: .8; }
-
-.toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 20; max-width: calc(100% - 32px); }
-.toast.show { opacity: 1; }
-
-.p-h { --pc: var(--p-h); --pc-bg: var(--p-h-bg); }
-.p-s { --pc: var(--p-s); --pc-bg: var(--p-s-bg); }
-.p-j { --pc: var(--p-j); --pc-bg: var(--p-j-bg); }
-.p-c { --pc: var(--p-c); --pc-bg: var(--p-c-bg); }
-
-@media (max-width: 640px) {
-  h1 { font-size: 21px; }
-  .stats { grid-template-columns: 1fr 1fr; }
-  .stat.main { grid-column: 1 / -1; }
-  .people { grid-template-columns: 1fr 1fr; }
-  .krw { font-size: 16px; }
-}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@400;500;800&family=Nanum+Gothic+Coding:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="titlerow"><h1>베트남 푸꾸옥 여행 결제 내역</h1><span class="saved-at num" id="savedAt"></span></div>
-    <p class="sub">2026.09.18 (금) ~ 09.23 (수) · 금액 단위: 베트남 동(₫) / 원(KRW)</p>
-    <div class="stats">
-      <div class="stat main"><div class="lbl">베트남 현지 총 지출</div><div class="val num" id="sTotal"></div><div class="val2 num" id="sTotal2"></div></div>
-      <div class="stat"><div class="lbl">카드 결제</div><div class="val num" id="sCard"></div><div class="val2 num" id="sCard2"></div></div>
-      <div class="stat"><div class="lbl">현금 결제</div><div class="val num" id="sCash"></div><div class="val2 num" id="sCash2"></div></div>
-    </div>
-  </header>
+<header class="topbar">
+  <div class="container">
+    <span class="wordmark">푸꾸옥 정산</span>
+    <span class="saved-at num" id="savedAt"></span>
+  </div>
+</header>
 
-  <h2>정산 (인천공항 포함)</h2>
-  <div class="people" id="people"></div>
-  <p class="sub admin-only" style="margin-top:10px">여러 명을 선택하면 금액을 균등하게 나눠요. 세부 항목에서 따로 고르면 그 항목 금액은 항목 선택대로, 나머지는 결제 건 선택대로 계산해요.</p>
-  <div class="unassigned" id="unassigned"></div>
+<div class="container">
+  <section class="head" aria-labelledby="title">
+    <h1 id="title">베트남 푸꾸옥 여행 결제 내역</h1>
+    <p class="meta"><span>2026.09.18 (금)부터 09.23 (수)까지</span><span>금액: 베트남 동(₫), 원(KRW)</span></p>
+    <div class="totals">
+      <div class="total total--main"><div class="lbl">베트남 현지 총 지출</div><div class="fig num" id="sTotal"></div><div class="sub2 num" id="sTotal2"></div></div>
+      <div class="total"><div class="lbl">카드 결제</div><div class="fig num" id="sCard"></div><div class="sub2 num" id="sCard2"></div></div>
+      <div class="total"><div class="lbl">현금 결제</div><div class="fig num" id="sCash"></div><div class="sub2 num" id="sCash2"></div></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="settle">
+    <h2 id="settle">정산 (인천공항 포함)</h2>
+    <div class="board">
+      <div class="board-head" aria-hidden="true"><span>이름</span><span>개인 부담</span><span>공용 ÷ 3 포함</span></div>
+      <div id="people"><p class="loading" style="padding-inline:16px">불러오는 중…</p></div>
+    </div>
+    <div class="unassigned" id="unassigned"></div>
+    <p class="hint admin-only">여러 명을 선택하면 금액을 균등하게 나눠요. 세부 항목에서 따로 고르면 그 항목 금액은 항목 선택대로, 나머지는 결제 건 선택대로 계산해요.</p>
+  </section>
 
   <div class="filters">
     <div class="savebar admin-only" id="savebar"><span id="saveStatus">불러오는 중…</span><button class="btn primary" id="saveBtn" type="button">저장</button></div>
@@ -238,40 +45,49 @@ footer { color: var(--muted); font-size: 12px; margin: 24px 0; }
     <div class="chiprow" id="fPay" role="group" aria-label="결제수단 필터"></div>
   </div>
 
-  <main id="list"></main>
+  <main id="list"><p class="loading">결제 내역을 불러오는 중…</p></main>
 
-  <h2>정리 기준</h2>
-  <ul class="rules">
-    <li><b>환율</b>: 모든 베트남 동 결제에 1₫ = 0.05210원 (100₫ = 5.210원, 9/22 기준, 여행 기간 중 가장 낮은 환율) 일괄 적용.</li>
-    <li><b>원화 환산</b>: 건별로 원 단위 반올림 후 합산. 세부 항목의 원화는 참고용이라 항목 합과 건 합계가 1~2원 다를 수 있음.</li>
-    <li><b>특이사항</b>: 냐방 레스토랑(588,000₫)은 카드내역에 ‘VNPAY*MANGOS SPA’로 표기됨. 베트남 프루츠 앤 모어(55,000₫)는 앱에 한국시간 기준 9/22로 표기되나 현지 9/21 결제.</li>
-    <li><b>제외</b>: 트래블월렛 충전(+₫9,200,000)은 지출이 아니므로 제외. 그랩 290,160₫ 결제는 같은 날 전액 취소되어 0 처리.</li>
-    <li><b>검산</b>: 트래블월렛 카드 사용액 8,544,388₫ = 총 충전 9,200,000₫ − 최종 잔액 655,612₫ (PDF 원본 기준 · 이후 9/21 연고 75,000₫ 추가, 9/18 그랩 트래블패스 25,000₫ 제외 반영 전).</li>
-    <li><b>인천공항</b>: 출국 전 리브팜(31,200원, 우리카드)과 귀국 후 장기 주차(27,000원, 현금)는 원화 결제라 베트남 현지 합계에는 미포함, 정산 합계에는 포함.</li>
-  </ul>
-
-  <section class="admin-only">
-  <h2>정산 데이터 (관리자)</h2>
-  <p class="sub">분류와 메모는 입력하는 즉시 이 브라우저에 임시 저장되고, <b>저장</b>을 누르면 GitHub 저장소의 <code>data.json</code>에 기록돼요. 저장된 내용은 페이지를 수정하거나 다른 기기에서 열어도 그대로 유지되고, 기본 주소로 들어온 사람에게 보기 전용으로 보여요.</p>
-  <div class="tools">
-    <button class="btn" id="shareBtn" type="button">보기 링크 복사</button>
-    <button class="btn" id="resetBtn" type="button">선택·메모 초기화</button>
-  </div>
-  <h2>GitHub 저장 토큰</h2>
-  <p class="sub" id="tokenStatus"></p>
-  <div class="token">
-    <input type="password" id="tokenInput" placeholder="github_pat_… (이 브라우저에만 보관)" autocomplete="off" aria-label="GitHub 토큰">
-    <button class="btn" id="tokenSave" type="button">토큰 등록</button>
-    <button class="btn" id="tokenClear" type="button">토큰 삭제</button>
-  </div>
-  <p class="sub" style="margin-top:8px"><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Fine-grained 토큰 만들기</a> → Repository access: <b>Only select repositories · vietnam-trip-expenses</b> → Permissions: <b>Contents · Read and write</b></p>
+  <section aria-labelledby="rules">
+    <h2 id="rules">정리 기준</h2>
+    <dl class="rules">
+      <div><dt>환율</dt><dd>모든 베트남 동 결제에 1₫ = 0.05210원 (100₫ = 5.210원, 9/22 기준, 여행 기간 중 가장 낮은 환율) 일괄 적용.</dd></div>
+      <div><dt>원화 환산</dt><dd>건별로 원 단위 반올림 후 합산. 세부 항목의 원화는 참고용이라 항목 합과 건 합계가 1~2원 다를 수 있음.</dd></div>
+      <div><dt>특이사항</dt><dd>냐방 레스토랑(588,000₫)은 카드내역에 <code>VNPAY*MANGOS SPA</code>로 표기됨. 베트남 프루츠 앤 모어(55,000₫)는 앱에 한국시간 기준 9/22로 표기되나 현지 9/21 결제.</dd></div>
+      <div><dt>제외</dt><dd>트래블월렛 충전(+₫9,200,000)은 지출이 아니므로 제외. 그랩 290,160₫ 결제는 같은 날 전액 취소되어 0 처리.</dd></div>
+      <div><dt>검산</dt><dd>트래블월렛 카드 사용액 8,544,388₫ = 총 충전 9,200,000₫ − 최종 잔액 655,612₫ (PDF 원본 기준, 이후 9/21 연고 75,000₫ 추가와 9/18 그랩 트래블패스 25,000₫ 제외는 반영 전).</dd></div>
+      <div><dt>인천공항</dt><dd>출국 전 리브팜(31,200원, 우리카드)과 귀국 후 장기 주차(27,000원, 현금)는 원화 결제라 베트남 현지 합계에는 미포함, 정산 합계에는 포함.</dd></div>
+    </dl>
   </section>
 
-  <footer>작성일 2026.09.27 · 트래블월렛 이용내역, 현지 영수증, 인천공항 영수증 기준</footer>
+  <section class="admin-only" aria-labelledby="admin">
+    <h2 id="admin">정산 데이터 (관리자)</h2>
+    <p class="sub">분류와 메모는 입력하는 즉시 이 브라우저에 임시 저장되고, <b>저장</b>을 누르면 GitHub 저장소의 <code>data.json</code>에 기록돼요. 저장된 내용은 페이지를 수정하거나 다른 기기에서 열어도 그대로 유지되고, 기본 주소로 들어온 사람에게 보기 전용으로 보여요.</p>
+    <div class="tools">
+      <button class="btn" id="shareBtn" type="button">보기 링크 복사</button>
+      <button class="btn" id="resetBtn" type="button">선택과 메모 초기화</button>
+    </div>
+    <h2>GitHub 저장 토큰</h2>
+    <p class="sub" id="tokenStatus"></p>
+    <div class="token">
+      <input type="password" id="tokenInput" placeholder="github_pat_… (이 브라우저에만 보관)" autocomplete="off" aria-label="GitHub 토큰">
+      <button class="btn" id="tokenSave" type="button">토큰 등록</button>
+      <button class="btn" id="tokenClear" type="button">토큰 삭제</button>
+    </div>
+    <ol class="steps">
+      <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Fine-grained 토큰 만들기</a></li>
+      <li>Repository access: <b>Only select repositories, vietnam-trip-expenses</b></li>
+      <li>Permissions: <b>Contents, Read and write</b></li>
+    </ol>
+  </section>
+
+  <footer>
+    <p>작성일 2026.09.27</p>
+    <p>트래블월렛 이용내역, 현지 영수증, 인천공항 영수증 기준</p>
+  </footer>
 </div>
 
 <div class="bar" aria-live="polite">
-  <div class="wrap">
+  <div class="container">
     <div><div class="lbl" id="barLbl">전체</div><div class="big num" id="barKrw"></div></div>
     <div class="r num" id="barSub"></div>
   </div>
@@ -292,14 +108,14 @@ const PAY = {
   cash: { label: "현금", cls: "b-cash", kind: "cash" },
 };
 const DAYS = [
-  { key: "air", label: "출국 전 · 인천공항", rate: "원화 결제 · 베트남 합계 미포함" },
+  { key: "air", label: "출국 전, 인천공항", rate: "원화 결제, 베트남 합계 미포함" },
   { key: "0918", label: "2026.09.18 (금)", rate: "" },
   { key: "0919", label: "2026.09.19 (토)", rate: "" },
   { key: "0920", label: "2026.09.20 (일)", rate: "" },
   { key: "0921", label: "2026.09.21 (월)", rate: "" },
   { key: "0922", label: "2026.09.22 (화)", rate: "" },
   { key: "0923", label: "2026.09.23 (수)", rate: "" },
-  { key: "air2", label: "귀국 후 · 인천공항 (09.23)", rate: "원화 결제 · 베트남 합계 미포함" },
+  { key: "air2", label: "귀국 후, 인천공항 (09.23)", rate: "원화 결제, 베트남 합계 미포함" },
 ];
 // items: [현지어, 한국어, 수량, VND, KRW, 세트구성여부]
 const ENTRIES = [
@@ -343,13 +159,13 @@ const ENTRIES = [
      ["Tea Plus trà chanh Yuzu 450ml", "티플러스 유자 레몬티 450ml (병)", 1, 10000, 521],
      ["Coke Zero chai 600ml", "코카콜라 제로 600ml (병)", 1, 9000, 469],
      ["PQSG mực bơ tỏi hũ 150g", "버터 갈릭 오징어 150g (병)", 1, 102000, 5314]],
-    note: "영수증 번호 LHD2601491WUJ · 할인 0% · 영수증 합계 1,304,000₫ = 카드내역 금액" },
+    note: "영수증 번호 LHD2601491WUJ, 할인 0%, 영수증 합계 1,304,000₫ = 카드내역 금액" },
   { id: "e07", day: "0919", name: "VNPAY XOM MOI GARDEN", ko: "쏨머이 가든 (베트남 식당)", pay: "travel", vnd: 680058, krw: 35431 },
   { id: "e08", day: "0919", name: "Grab* A-9RRAR8TGWLPBAV", ko: "그랩 차량 이동", pay: "travel", vnd: 286000, krw: 14901 },
 
   { id: "e09", day: "0920", time: "19:05", name: "Cơm thố tay cầm Seafood & Meat BBQ", ko: "껌토 따이깜 해산물·고기 BBQ (손잡이 뚝배기밥 식당)", pay: "travel", vnd: 655000, krw: 34126, receipt: true,
     items: [["Tôm thẻ kho tiêu", "흰다리새우 후추 뚝배기조림", 1, 185000, 9639], ["Mực tẩm bột chiên giòn", "오징어 튀김 (칼라마리)", 1, 185000, 9639], ["Rau muống xào tỏi", "모닝글로리 마늘볶음", 1, 70000, 3647], ["Cơm ghẹ Hàm Ninh", "함닌 꽃게살 볶음밥", 1, 165000, 8597], ["Saigon Special", "사이공 스페셜 맥주", 1, 30000, 1563], ["Mirinda xá xị", "미린다 사르사(루트비어맛) 탄산음료", 1, 20000, 1042]],
-    note: "카드내역 표기: COM THO TAY CAM · 리조트 앞 저녁식사" },
+    note: "카드내역 표기: COM THO TAY CAM, 리조트 앞 저녁식사" },
   { id: "e10", day: "0920", time: "21:15", name: "SEN SPA", ko: "센 스파 (연꽃 스파)", pay: "cash", vnd: 600000, krw: 31260, receipt: true,
     note: "영수증 원금액 1,200,000₫ 중 딥티슈 마사지 60분(600,000₫)은 정산에서 제외",
     items: [["Aloe Vera ice brewing (Lần)", "알로에베라 쿨링 진정 케어 (1회)", 1, 300000, 15630], ["Foot 30 (Lần)", "발 마사지 30분 (1회)", 1, 300000, 15630]] },
@@ -361,25 +177,25 @@ const ENTRIES = [
   { id: "e28", day: "0921", name: "Gel Remos IB", ko: "레모스 IB 연고 (벌레 물림 연고)", pay: "travel", vnd: 75000, krw: 3908 },
   { id: "e14", day: "0921", time: "18:45", name: "Cafe Green Sunset", ko: "카페 그린 선셋", pay: "cash", vnd: 440000, krw: 22924, receipt: true,
     items: [["Green Set", "그린 세트 (아래 4종 구성)", 1, 440000, 22924], ["Bingsu xoài", "망고 빙수", 1, null, null, true], ["Bánh croffle xoài", "망고 크로플", 1, null, null, true], ["Sinh tố xoài", "망고 스무디", 1, null, null, true], ["Sinh tố dưa hấu", "수박 스무디", 1, null, null, true]],
-    note: "망고빙수 세트 · 영수증 결제수단: Thanh toán tiền mặt(현금)" },
+    note: "망고빙수 세트, 영수증 결제수단: Thanh toán tiền mặt(현금)" },
   { id: "e15", day: "0921", time: "21:55", name: "Crazy Good Phu Quoc Squid", ko: "크레이지 굿 푸꾸옥 오징어 (야시장)", pay: "travel", vnd: 240000, krw: 12504, receipt: true,
     items: [["Khoai tây bò bằm phô mai", "다진 소고기 치즈 감자튀김", 1, 90000, 4689], ["Mực lá nướng muối ớt", "무늬오징어 소금·고추 구이", 1, 150000, 7815]],
-    note: "카드내역 표기: CN CTY TNHH MT PQ TAI HT · 야시장 오징어, 감튀 · 부가세 8% 포함" },
+    note: "카드내역 표기: CN CTY TNHH MT PQ TAI HT, 야시장 오징어, 감튀, 부가세 8% 포함" },
   { id: "e16", day: "0921", time: "22:20", name: "Vietnam Fruits & More", ko: "베트남 프루츠 앤 모어 (선셋타운 야시장 입구 상점)", pay: "travel", vnd: 55000, krw: 2866, receipt: true,
     items: [["Xịt xua muỗi hương Lavender (Mentholatum Remos) 70ml", "멘소래담 레모스 모기기피 스프레이 라벤더향 70ml", 1, 55000, 2866]],
-    note: "카드내역 표기: NCB*VIETNAM SELECT 6 (앱 표기일 9/22) · 모기퇴치약" },
+    note: "카드내역 표기: NCB*VIETNAM SELECT 6 (앱 표기일 9/22), 모기퇴치약" },
 
   { id: "e17", day: "0922", name: "Grab* A-9S4VXSCWW2CSAV", ko: "그랩 차량 이동", pay: "travel", vnd: 63440, krw: 3305 },
   { id: "e18", day: "0922", name: "NCB*THE LOUNGE", ko: "더 라운지 (카페·라운지)", pay: "travel", vnd: 119070, krw: 6204 },
 
   { id: "e19", day: "0923", time: "12:14", name: "NCB*NWPQR_FO 02 (Khem Beach)", ko: "뉴월드 푸꾸옥 리조트 (켐 비치)", pay: "hyundai", vnd: 1213380, krw: 63217, receipt: true,
-    items: [["Room service", "룸서비스 (영수증에 세부 메뉴 없음)", 1, 1213380, 63217]], note: "룸서비스 · 트래블월렛이 아닌 현대카드로 결제" },
+    items: [["Room service", "룸서비스 (영수증에 세부 메뉴 없음)", 1, 1213380, 63217]], note: "룸서비스, 트래블월렛이 아닌 현대카드로 결제" },
   { id: "e20", day: "0923", name: "Grab* A-9SBE7OIGWUOVAV", ko: "그랩 차량 이동", pay: "travel", vnd: 283920, krw: 14792 },
   { id: "e21", day: "0923", time: "16:15", name: "Nhà Vàng Restaurant", ko: "냐방 레스토랑 (‘황금집’ 식당)", pay: "travel", vnd: 588000, krw: 30635, receipt: true,
     items: [["Thịt kho trứng", "돼지고기 계란 장조림", 1, 130000, 6773], ["Bánh xèo", "반쎄오 (베트남식 부침개)", 1, 130000, 6773], ["Cơm chiên hải sản", "해산물 볶음밥", 1, 130000, 6773], ["Mực chiên giòn", "오징어 튀김", 1, 170000, 8857], ["Phí cà thẻ", "카드 결제 수수료", 1, 28000, 1459]],
-    note: "카드내역 표기: VNPAY*MANGOS SPA · 카드 수수료 5% 포함" },
+    note: "카드내역 표기: VNPAY*MANGOS SPA, 카드 수수료 5% 포함" },
   { id: "e22", day: "0923", time: "18:43", name: "HKD Little Win", ko: "리틀 윈 (개인사업자 마사지숍)", pay: "travel", vnd: 900000, krw: 46890, receipt: true,
-    items: [["Massage chân", "발 마사지", 1, 900000, 46890]], note: "카드내역 표기: HKD LITTLE WIN · 세부 항목 없는 카드 전표" },
+    items: [["Massage chân", "발 마사지", 1, 900000, 46890]], note: "카드내역 표기: HKD LITTLE WIN, 세부 항목 없는 카드 전표" },
   { id: "e23", day: "0923", time: "18:57", name: "Kingkong Coffee Food Court", ko: "킹콩커피 푸드코트 (즈엉동)", pay: "travel", vnd: 173600, krw: 9045, receipt: true,
     items: [["Sinh tố xoài (Mango smoothie)", "망고 스무디", 2, 158000, 8232], ["Bạc xỉu đá (White coffee – Ice)", "박씨우 아이스 (연유 화이트커피)", 1, 59000, 3074], ["Phiếu giảm giá hội viên", "회원 할인 쿠폰 (20%)", 1, -43400, -2261]],
     note: "카드내역 표기: KINGKONG COFFEE" },
@@ -512,7 +328,7 @@ function renderSaveStatus() {
   bar.classList.toggle("dirty", dirty);
   $("#saveStatus").textContent = saving ? "저장 중…"
     : dirty ? "저장하지 않은 변경이 있어요"
-    : savedAt ? `저장됨 · ${fmtTime(savedAt)}` : "저장됨";
+    : savedAt ? `저장됨 ${fmtTime(savedAt)}` : "저장됨";
   $("#saveBtn").disabled = saving;
   const token = getToken();
   $("#tokenStatus").textContent = token ? "토큰이 이 브라우저에 등록되어 있어요." : "저장하려면 저장소 쓰기 권한이 있는 GitHub 토큰을 한 번 등록해 주세요. 토큰은 이 브라우저에만 보관돼요.";
@@ -613,12 +429,13 @@ function renderStats() {
   const sum = (arr, k) => arr.reduce((s, e) => s + e[k], 0);
   const card = vn.filter((e) => payKind(e) === "card");
   const cash = vn.filter((e) => payKind(e) === "cash");
-  $("#sTotal").textContent = fmt(sum(vn, "krw")) + "원";
-  $("#sTotal2").textContent = `${fmt(sum(vn, "vnd"))} ₫ · ${vn.length}건`;
-  $("#sCard").textContent = fmt(sum(card, "krw")) + "원";
-  $("#sCard2").textContent = `${fmt(sum(card, "vnd"))} ₫ · ${card.length}건`;
-  $("#sCash").textContent = fmt(sum(cash, "krw")) + "원";
-  $("#sCash2").textContent = `${fmt(sum(cash, "vnd"))} ₫ · ${cash.length}건`;
+  const put = (id, arr) => {
+    $(`#${id}`).textContent = fmt(sum(arr, "krw")) + "원";
+    $(`#${id}2`).textContent = `${fmt(sum(arr, "vnd"))} ₫, ${arr.length}건`;
+  };
+  put("sTotal", vn);
+  put("sCard", card);
+  put("sCash", cash);
 }
 
 function totalsFor(who) {
@@ -635,20 +452,21 @@ function renderPeople() {
   const commonShare = common.krw / 3;
   $("#people").innerHTML = PEOPLE.map((p) => {
     const t = totalsFor(p.id);
-    const share = p.id === "c"
-      ? `<div class="share">1인당 (÷3) <b class="num">${fmt(commonShare)}원</b></div>`
-      : `<div class="share">개인 + 공용÷3 <b class="num">${fmt(t.krw + commonShare)}원</b></div>`;
+    const owe = p.id === "c"
+      ? `<span class="owe num">${fmt(commonShare)}원<small>1인당 (÷3)</small></span>`
+      : `<span class="owe num">${fmt(t.krw + commonShare)}원<small>개인 + 공용÷3</small></span>`;
     return `<button type="button" class="person p-${p.id}" data-who="${p.id}" aria-pressed="${filter.who === p.id}">
-      <div class="nm">${p.name}</div>
-      <div class="amt num">${fmt(t.krw)}원</div>
-      <div class="cnt">${t.n}건</div>
-      ${share}
+      <span class="nm"><span class="sw" aria-hidden="true"></span>${p.name}</span>
+      <span class="own num">${fmt(t.krw)}원<small>${t.n}건</small></span>
+      ${owe}
     </button>`;
   }).join("");
   const un = totalsFor("none");
-  $("#unassigned").innerHTML = un.n
-    ? `<span>아직 분류하지 않은 금액 <b class="num">${un.n}건 · ${fmt(un.krw)}원</b></span><button type="button" data-who="none">미지정만 보기</button>`
-    : `<span>모든 내역이 분류되었어요 ✓</span>`;
+  const box = $("#unassigned");
+  box.classList.toggle("late", un.n > 0);
+  box.innerHTML = un.n
+    ? `<span>아직 분류하지 않은 금액 <b class="num">${un.n}건, ${fmt(un.krw)}원</b></span><button type="button" data-who="none">미지정만 보기</button>`
+    : `<span>모든 내역이 분류되었어요</span>`;
 }
 
 function renderFilters() {
@@ -688,17 +506,17 @@ function itemsHTML(e) {
     const amt = sub
       ? `<div class="v">세트 포함</div>`
       : krwOnly
-        ? `<div class="num">${q > 1 ? `×${q} · ` : ""}${fmt(k)}원</div>`
-        : `<div class="num">${q > 1 ? `×${q} · ` : ""}${fmt(k)}원</div><div class="v num">${fmt(v)} ₫</div>`;
+        ? `<div class="num">${q > 1 ? `<span class="v">×${q}</span> ` : ""}${fmt(k)}원</div>`
+        : `<div class="num">${q > 1 ? `<span class="v">×${q}</span> ` : ""}${fmt(k)}원</div><div class="v num">${fmt(v)} ₫</div>`;
     const sel = state.i[itemKey(e.id, idx)] || [];
     return `<div class="it${sub ? " sub" : ""}">
-      <div class="it-top"><div>${sub ? "└ " : ""}${esc(vi)}${ko ? `<div class="k">${esc(ko)}</div>` : ""}</div><div class="it-amt">${amt}</div></div>
+      <div class="it-top"><div>${esc(vi)}${ko ? `<div class="k">${esc(ko)}</div>` : ""}</div><div class="it-amt">${amt}</div></div>
       ${VIEW && sel.length ? `<div class="split">${sel.map((k) => `<span class="p-${k}">${shortName(PEOPLE.find((pp) => pp.id === k))}</span>`).join("")}</div>` : ""}
       ${selectable && !VIEW ? `<div class="mini" role="group" aria-label="${esc(ko || vi)} 분류">${toggleButtons(sel, `data-id="${e.id}" data-item="${idx}"`, e.canceled)}</div>` : ""}
     </div>`;
   }).join("");
   return `<details class="items" data-for="${e.id}"${openDetails.has(e.id) ? " open" : ""}>
-    <summary>세부 항목 ${e.items.length}개${nSel ? ` · 개별 분류 ${nSel}개` : ""}</summary>
+    <summary>세부 항목 ${e.items.length}개${nSel ? `, 개별 분류 ${nSel}개` : ""}</summary>
     ${rows}
     ${e.note ? `<div class="inote">${esc(e.note)}</div>` : ""}
   </details>`;
@@ -732,8 +550,8 @@ function entryHTML(e) {
     <div class="top">
       <div class="l">
         ${e.time ? `<div class="time">${e.time}</div>` : ""}
-        <div class="name">${esc(e.name)}</div>
         <div class="ko">${esc(e.ko)}</div>
+        <div class="name">${esc(e.name)}</div>
       </div>
       <div class="r">${amount}</div>
     </div>
@@ -755,8 +573,8 @@ function renderList() {
     if (!list.length) continue;
     const krw = list.reduce((s, e) => s + amountFor(e), 0);
     const vnd = list.reduce((s, e) => s + vndOf(e, amountFor(e)), 0);
-    const tot = d.key.startsWith("air") ? `<b class="num">${fmt(krw)}원</b>` : `<span class="num">${fmt(vnd)} ₫</span> · <b class="num">${fmt(krw)}원</b>`;
-    html.push(`<section class="day"><div class="dayhead"><div class="d">${d.label}<span class="rate">${d.rate}</span></div><div class="tot">${tot}</div></div>${list.map(entryHTML).join("")}</section>`);
+    const tot = d.key.startsWith("air") ? `<b class="num">${fmt(krw)}원</b>` : `<span class="num">${fmt(vnd)} ₫</span><b class="num">${fmt(krw)}원</b>`;
+    html.push(`<section class="day"><div class="dayhead"><h3 class="d">${d.label}${d.rate ? `<span class="rate">${d.rate}</span>` : ""}</h3><div class="tot">${tot}</div></div>${list.map(entryHTML).join("")}</section>`);
   }
   $("#list").innerHTML = html.length ? html.join("") : `<div class="empty">조건에 맞는 결제 내역이 없어요</div>`;
 }
@@ -766,7 +584,7 @@ function renderBar() {
   const krw = list.reduce((s, e) => s + amountFor(e), 0);
   const vnd = list.reduce((s, e) => s + vndOf(e, amountFor(e)), 0);
   const whoLabel = filter.who === "all" ? "전체" : filter.who === "none" ? "미지정" : PEOPLE.find((p) => p.id === filter.who).name;
-  const payLabel = { all: "", card: " · 카드", cash: " · 현금" }[filter.pay];
+  const payLabel = { all: "", card: ", 카드", cash: ", 현금" }[filter.pay];
   $("#barLbl").textContent = `${whoLabel}${payLabel} 합계`;
   $("#barKrw").textContent = fmt(krw) + "원";
   const hasAir = list.some((e) => !isVietnam(e));
@@ -866,7 +684,7 @@ $("#resetBtn").addEventListener("click", () => {
   state = { a: {}, i: {}, m: {} };
   save();
   renderAll();
-  toast("초기화했어요 · 저장을 눌러야 반영돼요");
+  toast("초기화했어요. 저장을 눌러야 반영돼요");
 });
 
 renderStats();
