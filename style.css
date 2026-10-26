@@ -1,7 +1,7 @@
 /* tasteskill v2 · app screen · style: achromatic-ledger (finance, light) · overhaul with content and wiring kept
  * question: who owes how much · face: a blue-grey ledger ground (#f2f4f7) and the one chart hue on each person's share
  * signature: the settlement board, each person's share of the total as a bar in the chart hue
- * grid: canvas 1240 max = 24 pad + 380 left column + 24 gap + 788 main + 24 pad; under 60rem one column */
+ * layout: one scrolling column, 760 max; the filter tabs stick to the top while the ledger scrolls */
 
 :root {
   --ground: #f2f4f7;
@@ -76,9 +76,10 @@ a:hover { color: var(--chart-3); }
 .saved-at.err { color: var(--negative); }
 
 /* canvas */
-.canvas { max-width: 1240px; margin: 0 auto; padding: var(--pad); display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: var(--pad); align-items: start; }
-.left { position: sticky; top: var(--pad); max-height: calc(100vh - var(--pad) * 2 - var(--bar-h)); overflow-y: auto; scrollbar-width: thin; display: grid; gap: var(--gap); }
-.main { display: grid; gap: var(--gap); min-width: 0; }
+.canvas { max-width: 760px; margin: 0 auto; padding: var(--pad); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap); }
+/* the two wrappers dissolve so the filters stick against the whole page, not their own box */
+.left, .main { display: contents; }
+#list > .main { display: grid; gap: var(--gap); }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); }
 
 /* title */
@@ -124,7 +125,7 @@ a:hover { color: var(--chart-3); }
 .p-c { --pc-bg: var(--p-c-bg); --pc-ink: var(--p-c-ink); }
 
 /* filters and the save row */
-.filters { padding: 12px; display: grid; gap: 8px; }
+.filters { position: sticky; top: 0; z-index: 20; padding: 10px 12px; display: grid; gap: 8px; margin: 0 calc(var(--pad) * -1); padding-inline: var(--pad); background: var(--ground); border: 0; border-radius: 0; border-bottom: 1px solid var(--border); }
 .savebar { display: flex; align-items: center; gap: var(--gap); font-size: var(--fs-sub); color: var(--muted); }
 .bar .in > div:first-child { margin-right: auto; }
 .bar .r { margin-right: 8px; }
@@ -248,9 +249,6 @@ body.view .admin-only { display: none !important; }
 
 @media (max-width: 60rem) {
   :root { --pad: 16px; --pad-card: 16px; }
-  .canvas { grid-template-columns: minmax(0, 1fr); }
-  .left { position: static; max-height: none; overflow: visible; }
-  .filters { position: sticky; top: 0; z-index: 20; border-radius: 0; border-top: 0; margin: 0 calc(var(--pad) * -1); border-inline: 0; padding: 10px var(--pad); }
   .r1 { grid-template-columns: minmax(0, 1fr) auto; }
   .r1 .time { grid-column: 1 / -1; }
   .r2, .r3, .memo-view, details.items { margin-left: 0; }
@@ -260,4 +258,3 @@ body.view .admin-only { display: none !important; }
   body:not(.view) .bar .r { display: none; }
 }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.left .chip { padding: 0 5px; }
